@@ -56,9 +56,7 @@
                     </div>
                     <button onclick="nav('dashboard')" id="tab-dashboard" class="nav-tab font-semibold py-5 border-b-4 border-transparent hover:text-blue-200 transition">Мой счет</button>
                     <button onclick="nav('shops')" id="tab-shops" class="nav-tab font-semibold py-5 border-b-4 border-transparent hover:text-blue-200 transition">Маркетплейс</button>
-                    <!-- Вкладка Владельца магазина -->
                     <button onclick="nav('myshop')" id="tab-myshop" class="nav-tab font-semibold py-5 border-b-4 border-transparent hover:text-amber-200 transition hidden text-amber-300">Мой Магазин</button>
-                    <!-- Вкладка Админа/Банкира -->
                     <button onclick="nav('control')" id="tab-control" class="nav-tab font-semibold py-5 border-b-4 border-transparent hover:text-emerald-200 transition hidden text-emerald-300">Панель Управления</button>
                 </div>
                 <div class="flex items-center gap-4">
@@ -91,16 +89,18 @@
                         <!-- Перевод -->
                         <div class="bg-white rounded-2xl shadow-lg p-8">
                             <h3 class="text-xl font-bold text-slate-800 mb-6 border-b pb-2">Перевод игроку</h3>
+                            <p class="text-sm text-slate-500 mb-4 bg-blue-50 p-3 rounded text-blue-800">
+                                Вы переводите полную сумму. Комиссия банка (<b id="commission-rate">5%</b>) будет <b>вычтена из суммы получателя</b>.
+                            </p>
                             <div class="flex gap-4 mb-4">
                                 <input id="transfer-receiver" type="text" placeholder="Ник получателя" class="w-1/2 px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 bg-slate-50">
                                 <input id="transfer-amount" type="number" placeholder="Сумма АР" class="w-1/2 px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 bg-slate-50">
                             </div>
-                            <p class="text-sm text-slate-500 mb-4">Комиссия банка: <span id="commission-rate" class="font-bold text-blue-600">5%</span></p>
                             <button id="btn-transfer" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition shadow-md">Отправить перевод</button>
                             <p id="transfer-msg" class="mt-4 text-sm text-center font-medium hidden"></p>
                         </div>
                     </div>
-                    <!-- История (С ГОЛОВАМИ) -->
+                    <!-- История -->
                     <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col h-[450px]">
                         <h3 class="text-xl font-bold text-slate-800 mb-4 pb-2 border-b">Моя история</h3>
                         <div id="history-list" class="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin"></div>
@@ -116,7 +116,7 @@
                     <div id="shops-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
                 </div>
                 
-                <!-- Витрина конкретного магазина (Открывается при клике на магазин) -->
+                <!-- Витрина магазина -->
                 <div id="marketplace-storefront" class="hidden">
                     <button onclick="closeStorefront()" class="mb-6 text-blue-600 font-bold flex items-center gap-2 hover:underline">
                         &larr; Назад к списку магазинов
@@ -163,7 +163,7 @@
                 </div>
             </div>
 
-            <!-- ЭКРАН 4: ПАНЕЛЬ УПРАВЛЕНИЯ (ADMIN / BANKER) -->
+            <!-- ЭКРАН 4: ПАНЕЛЬ УПРАВЛЕНИЯ -->
             <div id="screen-control" class="screen-section hidden fade-in">
                 <div class="bg-slate-900 rounded-3xl shadow-2xl p-8 text-white border border-slate-700">
                     <h2 class="text-2xl font-black text-emerald-400 mb-6 border-b border-slate-700 pb-4">Терминал Управления</h2>
@@ -185,21 +185,24 @@
                             <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 mb-4 flex justify-between items-center">
                                 <div>
                                     <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Казна Банка</h4>
-                                    <p class="text-xs text-slate-500">Доход от доставки</p>
+                                    <p class="text-xs text-slate-500">Доходы с комиссий и доставки</p>
                                 </div>
-                                <div class="text-2xl font-black text-emerald-400"><span id="bank-treasury">0</span> АР</div>
+                                <div class="text-right">
+                                    <div class="text-2xl font-black text-emerald-400"><span id="bank-treasury">0</span> АР</div>
+                                    <button onclick="withdrawFromTreasury()" class="text-xs text-blue-400 hover:text-white underline mt-1">Снять себе на счет</button>
+                                </div>
                             </div>
                             
                             <div>
                                 <h4 class="font-bold mb-2 text-amber-400">Создать магазин игроку</h4>
                                 <input id="new-shop-name" type="text" placeholder="Название магазина" class="w-full mb-2 px-3 py-2 text-sm border border-slate-600 rounded bg-slate-900">
                                 <input id="new-shop-owner" type="text" placeholder="Ник владельца" class="w-full mb-3 px-3 py-2 text-sm border border-slate-600 rounded bg-slate-900">
-                                <button id="btn-create-shop" class="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded font-bold transition text-sm">Добавить магазин</button>
+                                <button id="btn-create-shop" class="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded font-bold transition text-sm">Создать магазин</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- База игроков (ТОЛЬКО ADMIN) -->
+                    <!-- База игроков -->
                     <div id="admin-users-list" class="mt-8 bg-slate-800 p-6 rounded-2xl border border-slate-600 hidden">
                         <h4 class="font-bold mb-4 text-amber-400">База игроков</h4>
                         <div class="max-h-64 overflow-y-auto scrollbar-thin">
@@ -229,7 +232,6 @@
             <h2 class="text-2xl font-bold mb-1">Оформление заказа</h2>
             <p class="text-sm text-slate-500 mb-4 border-b pb-2">Магазин: <b id="order-shop-name" class="text-slate-800">...</b></p>
             
-            <!-- Данные о товаре (Заблокированы для редактирования) -->
             <div class="bg-slate-50 p-4 rounded-xl border mb-4 flex items-center gap-4">
                 <img id="order-item-img" src="" class="w-16 h-16 rounded object-cover shadow-sm bg-white">
                 <div>
@@ -247,13 +249,12 @@
             <select id="order-dim" class="w-full mb-4 px-4 py-3 border rounded-lg bg-slate-50 text-slate-700 font-medium">
                 <option value="overworld">Обычный мир (Overworld)</option>
                 <option value="nether">Незер (Nether)</option>
-                <!-- Энд убран -->
             </select>
 
             <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-6">
                 <div class="flex justify-between text-sm mb-1"><span class="text-slate-600">Стоимость товара:</span> <b id="summary-price">0 АР</b></div>
                 <div class="flex justify-between text-sm mb-2 pb-2 border-b border-blue-200"><span class="text-slate-600">Доставка (в Казну):</span> <b>2 АР</b></div>
-                <div class="flex justify-between text-lg font-black text-blue-800"><span>ИТОГО К ОПЛАТЕ:</span> <span id="summary-total">0 АР</span></div>
+                <div class="flex justify-between text-lg font-black text-blue-800"><span>С ВАС СПИШУТ:</span> <span id="summary-total">0 АР</span></div>
             </div>
 
             <button id="btn-submit-order" class="w-full bg-emerald-500 text-white font-bold py-3 rounded-xl hover:bg-emerald-600 transition shadow">Оплатить заказ</button>
@@ -261,22 +262,18 @@
         </div>
     </div>
 
-    <!-- ОКНО ДОБАВЛЕНИЯ/РЕДАКТИРОВАНИЯ ТОВАРА (ДЛЯ ВЛАДЕЛЬЦА) -->
+    <!-- ОКНО ДОБАВЛЕНИЯ/РЕДАКТИРОВАНИЯ ТОВАРА -->
     <div id="edit-item-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 flex items-center justify-center hidden z-50">
         <div class="bg-white p-8 rounded-2xl w-[400px] relative modal-enter">
             <button onclick="toggleModal('edit-item-modal', false)" class="absolute top-4 right-4 text-slate-400 font-bold">&times;</button>
             <h2 class="text-xl font-bold mb-4" id="item-modal-title">Добавить товар</h2>
             <input type="hidden" id="edit-item-id">
-            
             <label class="text-xs font-bold text-slate-500">Название товара</label>
             <input id="edit-item-name" type="text" class="w-full mb-3 px-3 py-2 border rounded bg-slate-50">
-            
             <label class="text-xs font-bold text-slate-500">Цена (АР)</label>
             <input id="edit-item-price" type="number" class="w-full mb-3 px-3 py-2 border rounded bg-slate-50">
-            
             <label class="text-xs font-bold text-slate-500">Ссылка на фото (URL)</label>
             <input id="edit-item-img" type="text" placeholder="https://..." class="w-full mb-5 px-3 py-2 border rounded bg-slate-50">
-            
             <button id="btn-save-item" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">Сохранить товар</button>
         </div>
     </div>
@@ -301,14 +298,14 @@
         const db = getFirestore(app);
 
         let currentUserDoc = null;
-        let globalCommission = 5;
+        let globalCommission = 3; // По умолчанию 3%
         const DELIVERY_FEE = 2; // Фиксированная доставка 2 АР
         
         let allShops = [];
-        let myShopDoc = null; // Данные магазина текущего пользователя
-        let buyingItem = null; // Выбранный товар для покупки
+        let myShopDoc = null; 
+        let selectedShop = null;
+        let buyingItem = null; 
 
-        // Вспомогательные
         const getEmail = (user) => `${user.toLowerCase()}@arbank.ru`;
         window.toggleModal = (id, show) => { document.getElementById(id).classList.toggle('hidden', !show); };
         
@@ -327,10 +324,10 @@
         async function loadBankSettings() {
             const snap = await getDoc(doc(db, "settings", "bank"));
             if(snap.exists()) {
-                globalCommission = snap.data().commission || 5;
+                globalCommission = snap.data().commission || 3;
                 if(document.getElementById('bank-treasury')) document.getElementById('bank-treasury').innerText = (snap.data().revenue || 0).toFixed(2);
             } else {
-                await setDoc(doc(db, "settings", "bank"), { commission: 5, revenue: 0 });
+                await setDoc(doc(db, "settings", "bank"), { commission: 3, revenue: 0 });
             }
             document.getElementById('commission-rate').innerText = globalCommission + '%';
         }
@@ -340,7 +337,6 @@
             if (user) {
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('main-interface').classList.remove('hidden');
-                
                 const usernameId = user.email.split('@')[0];
                 const docSnap = await getDoc(doc(db, "users", usernameId));
                 
@@ -363,13 +359,9 @@
                             document.getElementById('admin-users-list').classList.remove('hidden');
                         }
                     }
-
-                    // Проверка, есть ли у игрока магазин
                     const shopsQ = query(collection(db, "shops"), where("owner", "==", currentUserDoc.username.toLowerCase()));
                     const myShopsSnap = await getDocs(shopsQ);
-                    if(!myShopsSnap.empty) {
-                        document.getElementById('tab-myshop').classList.remove('hidden');
-                    }
+                    if(!myShopsSnap.empty) document.getElementById('tab-myshop').classList.remove('hidden');
                 }
                 loadBankSettings(); loadHistory(); nav('dashboard');
             } else {
@@ -398,7 +390,7 @@
             } catch (e) { alert('Ошибка регистрации.'); }
         };
 
-        // ИСТОРИЯ (С ВОЗВРАТОМ ГОЛОВ)
+        // ИСТОРИЯ
         async function loadHistory() {
             const list = document.getElementById('history-list');
             const q1 = query(collection(db, "transactions"), where("sender", "==", currentUserDoc.username));
@@ -412,20 +404,17 @@
                 const sign = isInc ? '+' : '-';
                 const col = isInc ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-slate-700 bg-slate-50 border-slate-200';
                 
-                // ГОЛОВЫ
                 const otherUser = isInc ? tx.sender : tx.receiver;
-                // Если это банк или комиссия доставки
-                const headImg = (otherUser === "BANK" || otherUser === "BANK_DELIVERY") 
-                    ? "https://minecraft.wiki/images/Diamond_Ore_%28texture%29_JE5_BE5.png" 
-                    : `https://minotar.net/helm/${otherUser}/50.png`;
+                const headImg = (otherUser === "BANK") ? "https://minecraft.wiki/images/Diamond_Ore_%28texture%29_JE5_BE5.png" : `https://minotar.net/helm/${otherUser}/50.png`;
 
                 let title = isInc ? 'От: '+tx.sender : 'Кому: '+tx.receiver;
-                if(otherUser === "BANK_DELIVERY") title = "Оплата доставки";
+                if(tx.type === 'commission') title = 'Комиссия Банка';
+                if(tx.type === 'delivery') title = 'Оплата доставки';
 
                 list.innerHTML += `
                     <div class="p-3 rounded-xl border mb-2 flex justify-between items-center shadow-sm ${col}">
                         <div class="flex items-center gap-3">
-                            <img src="${headImg}" class="w-8 h-8 rounded shadow-sm ${otherUser.includes('BANK')?'pixelated':''}">
+                            <img src="${headImg}" class="w-8 h-8 rounded shadow-sm ${otherUser==='BANK'?'pixelated':''}">
                             <div>
                                 <p class="font-bold text-sm">${title}</p>
                                 <p class="text-[10px] opacity-70">${new Date(tx.date).toLocaleString([], {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})}</p>
@@ -436,31 +425,43 @@
             });
         }
 
-        // ОБЫЧНЫЙ ПЕРЕВОД
+        // --- ЛОГИКА ПЕРЕВОДА (ОБНОВЛЕНО) ---
+        // Отправитель платит X. Получателю приходит (X - Комиссия). Банку уходит Комиссия.
         document.getElementById('btn-transfer').onclick = async () => {
             const receiverRaw = document.getElementById('transfer-receiver').value.trim();
             const amount = parseFloat(document.getElementById('transfer-amount').value);
             const err = document.getElementById('transfer-msg');
             
             if(!receiverRaw || !amount || amount <= 0) return;
-            const commissionAmount = amount * (globalCommission / 100);
-            const total = amount + commissionAmount;
+            if(receiverRaw.toLowerCase() === currentUserDoc.username.toLowerCase()) return alert("Нельзя перевести себе.");
+            
+            const commAmount = amount * (globalCommission / 100);
+            const receiveAmount = amount - commAmount;
             
             try {
                 await runTransaction(db, async (t) => {
                     const senderRef = doc(db, "users", currentUserDoc.username.toLowerCase());
                     const recRef = doc(db, "users", receiverRaw.toLowerCase());
+                    const bankRef = doc(db, "settings", "bank");
+                    
                     const sSnap = await t.get(senderRef);
                     const rSnap = await t.get(recRef);
+                    const bSnap = await t.get(bankRef);
                     
                     if(!rSnap.exists()) throw "Получатель не найден!";
-                    if(sSnap.data().balance < total) throw "Недостаточно АР (с учетом комиссии)";
+                    if(sSnap.data().balance < amount) throw "Недостаточно АР для перевода";
                     
-                    t.update(senderRef, { balance: sSnap.data().balance - total });
-                    t.update(recRef, { balance: rSnap.data().balance + amount });
-                    t.set(doc(collection(db, "transactions")), { sender: sSnap.data().username, receiver: rSnap.data().username, amount, date: Date.now() });
+                    // Обновляем балансы
+                    t.update(senderRef, { balance: sSnap.data().balance - amount });
+                    t.update(recRef, { balance: rSnap.data().balance + receiveAmount });
+                    const curBankRev = bSnap.exists() ? (bSnap.data().revenue || 0) : 0;
+                    t.update(bankRef, { revenue: curBankRev + commAmount });
+                    
+                    // Логи
+                    t.set(doc(collection(db, "transactions")), { sender: sSnap.data().username, receiver: rSnap.data().username, amount: amount, type: "transfer", date: Date.now() });
+                    t.set(doc(collection(db, "transactions")), { sender: rSnap.data().username, receiver: "BANK", amount: parseFloat(commAmount.toFixed(2)), type: "commission", date: Date.now() });
                 });
-                err.innerText = "Успешно!"; err.className = "mt-4 text-sm text-center font-bold text-emerald-500 block";
+                err.innerText = "Успешно отправлено!"; err.className = "mt-4 text-sm text-center font-bold text-emerald-500 block";
                 document.getElementById('transfer-amount').value = ''; document.getElementById('transfer-receiver').value = '';
                 const n = await getDoc(doc(db, "users", currentUserDoc.username.toLowerCase()));
                 document.getElementById('balance-amount').innerText = n.data().balance.toFixed(2);
@@ -469,7 +470,7 @@
             setTimeout(() => err.style.display='none', 4000);
         };
 
-        // --- МАРКЕТПЛЕЙС (ПОКУПАТЕЛЬ) ---
+        // --- МАРКЕТПЛЕЙС (ОБНОВЛЕНО) ---
         async function loadShops() {
             const list = document.getElementById('shops-list');
             list.innerHTML = '';
@@ -501,9 +502,10 @@
             
             const list = document.getElementById('sf-items-list');
             list.innerHTML = '';
-            const items = s.items || [];
             
-            if(items.length === 0) list.innerHTML = '<p class="text-slate-400">Товаров пока нет.</p>';
+            // Защита от отсутствия массива товаров
+            const items = s.items || [];
+            if(items.length === 0) { list.innerHTML = '<p class="text-slate-400">Товаров пока нет.</p>'; return; }
             
             items.forEach((item, idx) => {
                 const img = item.img || "https://minecraft.wiki/images/Grass_Block_JE4.png";
@@ -524,21 +526,18 @@
             document.getElementById('marketplace-main').classList.remove('hidden');
         };
 
-        // ОТКРЫТИЕ ЗАКАЗА И ПОКУПКА
         window.buyItem = (itemIdx) => {
             buyingItem = selectedShop.items[itemIdx];
             document.getElementById('order-shop-name').innerText = selectedShop.name;
-            
             document.getElementById('order-item-img').src = buyingItem.img || "https://minecraft.wiki/images/Grass_Block_JE4.png";
             document.getElementById('order-item-name').innerText = buyingItem.name;
             document.getElementById('order-item-price').innerText = buyingItem.price;
-            
             document.getElementById('summary-price').innerText = buyingItem.price + ' АР';
             document.getElementById('summary-total').innerText = (parseFloat(buyingItem.price) + DELIVERY_FEE) + ' АР';
-            
             toggleModal('order-modal', true);
         };
 
+        // ЛОГИКА ОПЛАТЫ ТОВАРА С КОМИССИЕЙ ДЛЯ ПРОДАВЦА
         document.getElementById('btn-submit-order').onclick = async () => {
             const x = document.getElementById('order-x').value;
             const y = document.getElementById('order-y').value;
@@ -548,38 +547,45 @@
 
             if(!x || !y || !z) { err.innerText="Введите координаты!"; err.classList.remove('hidden'); return; }
             
-            const totalDeduction = parseFloat(buyingItem.price) + DELIVERY_FEE;
+            const itemPrice = parseFloat(buyingItem.price);
+            const buyerTotal = itemPrice + DELIVERY_FEE;
+            
+            // Продавец получает цену товара МИНУС комиссия
+            const commAmount = itemPrice * (globalCommission / 100);
+            const sellerReceives = itemPrice - commAmount;
+
             document.getElementById('btn-submit-order').disabled = true;
 
             try {
                 await runTransaction(db, async (t) => {
                     const buyerRef = doc(db, "users", currentUserDoc.username.toLowerCase());
                     const ownerRef = doc(db, "users", selectedShop.owner.toLowerCase());
-                    const bankRef = doc(db, "settings", "bank"); // КАЗНА БАНКА
+                    const bankRef = doc(db, "settings", "bank");
                     
-                    const buyerSnap = await t.get(buyerRef);
-                    const ownerSnap = await t.get(ownerRef);
+                    const bSnap = await t.get(buyerRef);
+                    const oSnap = await t.get(ownerRef);
                     const bankSnap = await t.get(bankRef);
 
-                    if(buyerSnap.data().balance < totalDeduction) throw "Недостаточно АР для оплаты товара и доставки";
-                    if(!ownerSnap.exists()) throw "Владелец магазина не найден в базе!";
+                    if(bSnap.data().balance < buyerTotal) throw "Недостаточно АР для оплаты товара и доставки";
+                    if(!oSnap.exists()) throw "Владелец магазина не найден в базе!";
 
                     // 1. Снимаем всю сумму с покупателя
-                    t.update(buyerRef, { balance: buyerSnap.data().balance - totalDeduction });
-                    // 2. Отправляем цену товара владельцу магазина
-                    t.update(ownerRef, { balance: ownerSnap.data().balance + parseFloat(buyingItem.price) });
-                    // 3. Отправляем 2 АР (доставку) в казну банка
-                    const currentRevenue = bankSnap.exists() ? (bankSnap.data().revenue || 0) : 0;
-                    t.update(bankRef, { revenue: currentRevenue + DELIVERY_FEE });
+                    t.update(buyerRef, { balance: bSnap.data().balance - buyerTotal });
+                    // 2. Отправляем цену товара владельцу (за вычетом комиссии)
+                    t.update(ownerRef, { balance: oSnap.data().balance + sellerReceives });
+                    // 3. Отправляем комиссию + доставку в Казну Банка
+                    const curBankRev = bankSnap.exists() ? (bankSnap.data().revenue || 0) : 0;
+                    t.update(bankRef, { revenue: curBankRev + commAmount + DELIVERY_FEE });
                     
-                    // Записи в историю
-                    t.set(doc(collection(db, "transactions")), { sender: buyerSnap.data().username, receiver: ownerSnap.data().username, amount: parseFloat(buyingItem.price), date: Date.now() });
-                    t.set(doc(collection(db, "transactions")), { sender: buyerSnap.data().username, receiver: "BANK_DELIVERY", amount: DELIVERY_FEE, date: Date.now() });
+                    // Логи
+                    t.set(doc(collection(db, "transactions")), { sender: bSnap.data().username, receiver: oSnap.data().username, amount: itemPrice, type: "shop_purchase", date: Date.now() });
+                    t.set(doc(collection(db, "transactions")), { sender: bSnap.data().username, receiver: "BANK", amount: DELIVERY_FEE, type: "delivery", date: Date.now() });
+                    t.set(doc(collection(db, "transactions")), { sender: oSnap.data().username, receiver: "BANK", amount: parseFloat(commAmount.toFixed(2)), type: "commission", date: Date.now() });
                     
-                    // Создаем заказ для админов
+                    // Заказ
                     t.set(doc(collection(db, "orders")), { 
                         shopName: selectedShop.name, item: buyingItem.name, price: buyingItem.price, 
-                        customer: buyerSnap.data().username, coords: `X:${x} Y:${y} Z:${z} (${dim})`, date: Date.now()
+                        customer: bSnap.data().username, coords: `X:${x} Y:${y} Z:${z} (${dim})`, date: Date.now()
                     });
                 });
                 alert("Успешно оплачено! Ожидайте доставку.");
@@ -591,11 +597,11 @@
             finally { document.getElementById('btn-submit-order').disabled = false; }
         };
 
-        // --- УПРАВЛЕНИЕ СВОИМ МАГАЗИНОМ (ВЛАДЕЛЕЦ) ---
+        // --- УПРАВЛЕНИЕ СВОИМ МАГАЗИНОМ ---
         async function loadMyShop() {
             const q = query(collection(db, "shops"), where("owner", "==", currentUserDoc.username.toLowerCase()));
             const snap = await getDocs(q);
-            if(snap.empty) return; // Не должно произойти
+            if(snap.empty) return;
             
             myShopDoc = { id: snap.docs[0].id, ...snap.docs[0].data() };
             document.getElementById('myshop-name').value = myShopDoc.name || "";
@@ -713,22 +719,16 @@
             });
         }
 
-        // Создание магазина (Админ)
         document.getElementById('btn-create-shop').onclick = async () => {
             const n = document.getElementById('new-shop-name').value;
             const o = document.getElementById('new-shop-owner').value.toLowerCase();
             if(!n||!o) return alert("Введите название и владельца");
-            
             const userSnap = await getDoc(doc(db, "users", o));
             if(!userSnap.exists()) return alert("Игрок не найден в базе!");
-
             await addDoc(collection(db, "shops"), { name: n, description: "Новый магазин", owner: o, items: [], logo: "" });
-            alert("Магазин успешно создан! Теперь владелец увидит вкладку 'Мой магазин'.");
-            document.getElementById('new-shop-name').value = '';
-            document.getElementById('new-shop-owner').value = '';
+            alert("Магазин создан!"); document.getElementById('new-shop-name').value = ''; document.getElementById('new-shop-owner').value = '';
         };
 
-        // Выдача / Снятие (Админ/Банкир)
         async function manageBal(action) {
             const uRaw = document.getElementById('admin-user').value.trim().toLowerCase();
             const am = parseFloat(document.getElementById('admin-amount').value);
@@ -738,7 +738,6 @@
                 const snap = await getDoc(ref);
                 if(!snap.exists()) return alert('Игрок не найден');
                 let bal = snap.data().balance;
-                
                 if(action==='add') {
                     await updateDoc(ref, { balance: bal + am });
                     await addDoc(collection(db, "transactions"), { sender: "BANK", receiver: snap.data().username, amount: am, date: Date.now() });
@@ -753,6 +752,30 @@
         }
         document.getElementById('btn-topup').onclick = () => manageBal('add');
         document.getElementById('btn-withdraw').onclick = () => manageBal('remove');
+
+        // Снятие денег из Казны Банка (Только Админ)
+        window.withdrawFromTreasury = async () => {
+            if(currentUserDoc.role !== 'admin') return;
+            try {
+                await runTransaction(db, async (t) => {
+                    const bankRef = doc(db, "settings", "bank");
+                    const adminRef = doc(db, "users", currentUserDoc.username.toLowerCase());
+                    const bSnap = await t.get(bankRef);
+                    const aSnap = await t.get(adminRef);
+                    
+                    const treasuryBalance = bSnap.data().revenue || 0;
+                    if(treasuryBalance <= 0) throw "В казне нет средств!";
+                    
+                    t.update(bankRef, { revenue: 0 });
+                    t.update(adminRef, { balance: aSnap.data().balance + treasuryBalance });
+                    t.set(doc(collection(db, "transactions")), { sender: "BANK", receiver: aSnap.data().username, amount: treasuryBalance, type: "treasury_withdraw", date: Date.now() });
+                });
+                alert("Средства из Казны переведены на ваш личный счет!");
+                const n = await getDoc(doc(db, "users", currentUserDoc.username.toLowerCase()));
+                document.getElementById('balance-amount').innerText = n.data().balance.toFixed(2);
+                loadBankSettings(); loadHistory(); loadAllUsers();
+            } catch(e) { alert(e); }
+        };
     </script>
 </body>
 </html>
