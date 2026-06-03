@@ -13,45 +13,20 @@
         .modal-enter { animation: modalFade 0.3s ease-out forwards; }
         @keyframes modalFade { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
-        /* НАСТОЯЩИЙ 3D MINECRAFT БЛОК */
-        .mc-scene { 
-            perspective: 800px; 
-            margin: 0 auto; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-        }
-        .mc-block { 
-            width: var(--size); 
-            height: var(--size); 
-            position: relative; 
-            transform-style: preserve-3d; 
-            animation: spinBlock var(--speed, 6s) infinite linear; 
-        }
+        /* 3D БЛОК */
+        .mc-scene { perspective: 800px; margin: 0 auto; display: flex; justify-content: center; align-items: center; }
+        .mc-block { width: var(--size); height: var(--size); position: relative; transform-style: preserve-3d; animation: spinBlock var(--speed, 6s) infinite linear; }
         .mc-face { 
-            position: absolute; 
-            width: 100%; 
-            height: 100%; 
-            /* Ссылка на текстуру руды */
+            position: absolute; width: 100%; height: 100%; 
             background-image: url('https://minecraft.wiki/images/Diamond_Ore_%28texture%29_JE5_BE5.png'); 
-            background-size: cover; 
-            image-rendering: pixelated; /* Делает пиксели четкими! */
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.6); /* Тени по краям блока */
-            border: 1px solid rgba(0,0,0,0.1);
+            background-size: cover; image-rendering: pixelated; 
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.6); border: 1px solid rgba(0,0,0,0.1);
         }
-        /* Расставляем грани по сторонам куба в зависимости от размера */
-        .mc-front  { transform: translateZ(calc(var(--size) / 2)); } 
-        .mc-back   { transform: rotateY(180deg) translateZ(calc(var(--size) / 2)); }
-        .mc-right  { transform: rotateY(90deg) translateZ(calc(var(--size) / 2)); } 
-        .mc-left   { transform: rotateY(-90deg) translateZ(calc(var(--size) / 2)); }
-        .mc-top    { transform: rotateX(90deg) translateZ(calc(var(--size) / 2)); } 
-        .mc-bottom { transform: rotateX(-90deg) translateZ(calc(var(--size) / 2)); }
+        .mc-front  { transform: translateZ(calc(var(--size) / 2)); } .mc-back   { transform: rotateY(180deg) translateZ(calc(var(--size) / 2)); }
+        .mc-right  { transform: rotateY(90deg) translateZ(calc(var(--size) / 2)); } .mc-left   { transform: rotateY(-90deg) translateZ(calc(var(--size) / 2)); }
+        .mc-top    { transform: rotateX(90deg) translateZ(calc(var(--size) / 2)); } .mc-bottom { transform: rotateX(-90deg) translateZ(calc(var(--size) / 2)); }
         
-        /* Анимация вращения (с наклоном как дроп в майнкрафте) */
-        @keyframes spinBlock { 
-            0% { transform: rotateX(-20deg) rotateY(0deg); } 
-            100% { transform: rotateX(-20deg) rotateY(360deg); } 
-        }
+        @keyframes spinBlock { 0% { transform: rotateX(-20deg) rotateY(0deg); } 100% { transform: rotateX(-20deg) rotateY(360deg); } }
     </style>
 </head>
 <body class="text-slate-800">
@@ -59,16 +34,11 @@
     <!-- ЭКРАН ВХОДА -->
     <div id="auth-screen" class="min-h-screen flex items-center justify-center fade-in">
         <div class="bg-white p-8 rounded-2xl shadow-xl w-96 text-center border-t-4 border-blue-600">
-            
-            <!-- 3D Блок руды -->
             <div class="mc-scene mb-8" style="--size: 80px; --speed: 8s;">
                 <div class="mc-block">
-                    <div class="mc-face mc-front"></div><div class="mc-face mc-back"></div>
-                    <div class="mc-face mc-right"></div><div class="mc-face mc-left"></div>
-                    <div class="mc-face mc-top"></div><div class="mc-face mc-bottom"></div>
+                    <div class="mc-face mc-front"></div><div class="mc-face mc-back"></div><div class="mc-face mc-right"></div><div class="mc-face mc-left"></div><div class="mc-face mc-top"></div><div class="mc-face mc-bottom"></div>
                 </div>
             </div>
-            
             <h1 class="text-3xl font-bold text-blue-900 mb-2">AR Bank</h1>
             <p class="text-slate-500 mb-8">Войдите для управления счетом</p>
             
@@ -90,7 +60,7 @@
             <h2 class="text-2xl font-bold text-slate-800 mb-2">Регистрация</h2>
             <p class="text-sm text-slate-500 mb-6">Создайте свой банковский счет для АР</p>
 
-            <input id="reg-user" type="text" placeholder="Ваш ник в игре (точно как на сервере)" class="w-full mb-4 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-slate-50">
+            <input id="reg-user" type="text" placeholder="Ваш ник (точно как на сервере)" class="w-full mb-4 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-slate-50">
             <input id="reg-pass" type="password" placeholder="Придумайте пароль (от 6 символов)" class="w-full mb-6 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-slate-50">
 
             <button id="btn-register" class="w-full bg-emerald-500 text-white font-bold py-3 rounded-lg hover:bg-emerald-600 transition shadow-md">Зарегистрироваться</button>
@@ -104,21 +74,22 @@
         <header class="bg-blue-700 text-white shadow-md">
             <div class="max-w-5xl mx-auto px-6 py-3 flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <!-- Маленький 3D Блок в шапке -->
                     <div class="mc-scene" style="--size: 32px; --speed: 12s;">
                         <div class="mc-block">
-                            <div class="mc-face mc-front"></div><div class="mc-face mc-back"></div>
-                            <div class="mc-face mc-right"></div><div class="mc-face mc-left"></div>
-                            <div class="mc-face mc-top"></div><div class="mc-face mc-bottom"></div>
+                            <div class="mc-face mc-front"></div><div class="mc-face mc-back"></div><div class="mc-face mc-right"></div><div class="mc-face mc-left"></div><div class="mc-face mc-top"></div><div class="mc-face mc-bottom"></div>
                         </div>
                     </div>
                     <h2 class="text-xl font-bold tracking-wide">AR Bank</h2>
                 </div>
                 <div class="flex items-center gap-4">
-                    <!-- Аватарка игрока (подгружается автоматически) -->
+                    <!-- Аватарка и бейдж банкира -->
                     <div class="flex items-center gap-3 bg-blue-800 px-4 py-2 rounded-lg border border-blue-600 shadow-inner">
-                        <img id="player-avatar" src="" alt="Head" class="w-8 h-8 rounded-md bg-blue-900 shadow">
-                        <span id="welcome-text" class="font-medium tracking-wide">Загрузка...</span>
+                        <img id="player-avatar" src="" alt="Head" class="w-9 h-9 rounded-md bg-blue-900 shadow">
+                        <div class="flex flex-col justify-center">
+                            <span id="welcome-text" class="font-medium tracking-wide leading-tight">Загрузка...</span>
+                            <!-- Плашка БАНКИР (по умолчанию скрыта) -->
+                            <span id="role-badge" class="hidden text-[10px] font-bold uppercase tracking-widest text-emerald-400 mt-0.5">Банкир</span>
+                        </div>
                     </div>
                     <button id="btn-logout" class="bg-slate-100 text-slate-700 font-bold px-4 py-2 rounded-lg hover:bg-white transition shadow">Выход</button>
                 </div>
@@ -129,17 +100,13 @@
             <div class="md:col-span-2 space-y-6">
                 <!-- Баланс -->
                 <div class="bg-white rounded-2xl shadow-lg p-8 border-l-8 border-blue-500 relative overflow-hidden">
-                    <!-- Огромный блок на заднем фоне -->
                     <div class="absolute -right-16 -top-16 opacity-10 pointer-events-none">
                         <div class="mc-scene" style="--size: 250px; --speed: 30s;">
                             <div class="mc-block">
-                                <div class="mc-face mc-front"></div><div class="mc-face mc-back"></div>
-                                <div class="mc-face mc-right"></div><div class="mc-face mc-left"></div>
-                                <div class="mc-face mc-top"></div><div class="mc-face mc-bottom"></div>
+                                <div class="mc-face mc-front"></div><div class="mc-face mc-back"></div><div class="mc-face mc-right"></div><div class="mc-face mc-left"></div><div class="mc-face mc-top"></div><div class="mc-face mc-bottom"></div>
                             </div>
                         </div>
                     </div>
-
                     <p class="text-slate-500 text-sm font-semibold uppercase tracking-wider mb-1 relative z-10">Доступный баланс</p>
                     <div class="flex items-end gap-2 relative z-10">
                         <span id="balance-amount" class="text-6xl font-extrabold text-slate-800 tracking-tight">0</span>
@@ -179,26 +146,53 @@
             </div>
         </div>
 
-        <!-- АДМИН ПАНЕЛЬ -->
+        <!-- КРАСИВАЯ АДМИН ПАНЕЛЬ БАНКИРА -->
         <div id="admin-panel" class="hidden max-w-5xl mx-auto px-6 pb-12 fade-in">
-            <div class="bg-slate-900 rounded-2xl shadow-2xl p-8 text-white border-t-4 border-emerald-500">
-                <h3 class="text-xl font-bold text-emerald-400 mb-6 border-b border-slate-700 pb-3 flex items-center gap-2">
-                    <span class="text-2xl">⚡</span> Панель Управления Банкира
+            <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl shadow-2xl p-8 text-white border border-slate-700 relative overflow-hidden">
+                <!-- Задний светящийся эффект -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500 opacity-5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+                
+                <h3 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200 mb-8 pb-4 border-b border-slate-700 flex items-center gap-3 relative z-10">
+                    <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    Терминал Банкира
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-                        <h4 class="font-semibold mb-4 text-slate-300">Начислить АР на счет</h4>
-                        <input id="admin-user" type="text" placeholder="Точный ник игрока" class="w-full mb-3 px-4 py-3 border border-slate-600 rounded-lg bg-slate-900 text-white focus:border-emerald-500 outline-none">
-                        <input id="admin-amount" type="number" placeholder="Количество" class="w-full mb-4 px-4 py-3 border border-slate-600 rounded-lg bg-slate-900 text-white focus:border-emerald-500 outline-none">
-                        <button id="btn-topup" class="w-full bg-emerald-600 font-bold py-3 rounded-lg hover:bg-emerald-500 transition">Выполнить начисление</button>
-                    </div>
-                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-                        <h4 class="font-semibold mb-4 text-slate-300">Управление комиссией (%)</h4>
-                        <div class="flex items-center gap-6 mb-8 mt-6">
-                            <input id="admin-comm-slider" type="range" min="0" max="30" step="1" value="5" class="w-full h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer">
-                            <span id="comm-val" class="font-bold text-3xl text-emerald-400 w-16 text-right">5%</span>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+                    <!-- Управление балансом -->
+                    <div class="bg-slate-800/60 p-6 rounded-2xl border border-slate-600 backdrop-blur-sm shadow-inner">
+                        <h4 class="font-bold mb-5 text-slate-200 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Управление счетом игрока
+                        </h4>
+                        <input id="admin-user" type="text" placeholder="Никнейм игрока" class="w-full mb-4 px-4 py-3 border border-slate-600 rounded-xl bg-slate-900/80 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition">
+                        <input id="admin-amount" type="number" placeholder="Сумма АР" class="w-full mb-6 px-4 py-3 border border-slate-600 rounded-xl bg-slate-900/80 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition">
+                        
+                        <div class="flex gap-4">
+                            <button id="btn-topup" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition flex justify-center items-center gap-2 shadow-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                Выдать
+                            </button>
+                            <button id="btn-withdraw" class="w-1/2 bg-red-500/90 hover:bg-red-400 text-white font-bold py-3 rounded-xl transition flex justify-center items-center gap-2 shadow-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                                Снять
+                            </button>
                         </div>
-                        <button id="btn-commission" class="w-full bg-blue-600 font-bold py-3 rounded-lg hover:bg-blue-500 transition mt-2">Применить новые правила</button>
+                    </div>
+                    
+                    <!-- Настройка банка -->
+                    <div class="bg-slate-800/60 p-6 rounded-2xl border border-slate-600 backdrop-blur-sm shadow-inner flex flex-col">
+                        <h4 class="font-bold mb-5 text-slate-200 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            Настройки Банка
+                        </h4>
+                        <div class="mb-2 text-sm text-slate-400">Комиссия за переводы игроков:</div>
+                        <div class="flex items-center gap-6 mb-auto bg-slate-900/50 p-4 rounded-xl border border-slate-700">
+                            <input id="admin-comm-slider" type="range" min="0" max="30" step="1" value="5" class="w-full h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-amber-500">
+                            <span id="comm-val" class="font-black text-3xl text-amber-400 w-16 text-right">5%</span>
+                        </div>
+                        <button id="btn-commission" class="w-full bg-slate-700 hover:bg-slate-600 border border-slate-500 text-white font-bold py-3 rounded-xl transition mt-6 shadow-md">
+                            Применить комиссию
+                        </button>
                     </div>
                 </div>
             </div>
@@ -227,7 +221,6 @@
         let currentUserDoc = null;
         let globalCommission = 5;
 
-        // Открытие/закрытие модального окна
         window.toggleModal = (id, show) => {
             const el = document.getElementById(id);
             if(show) { el.classList.remove('hidden'); document.getElementById('reg-error').style.display='none'; }
@@ -253,7 +246,6 @@
             document.getElementById('comm-val').innerText = globalCommission + '%';
         }
 
-        // Регистрация
         document.getElementById('btn-register').onclick = async () => {
             const u = document.getElementById('reg-user').value.trim();
             const p = document.getElementById('reg-pass').value;
@@ -269,7 +261,6 @@
             } catch (e) { showErr('reg-error', 'Ошибка. Пароль слишком простой или ник занят.'); }
         };
 
-        // Вход
         document.getElementById('btn-login').onclick = async () => {
             const u = document.getElementById('login-user').value.trim();
             const p = document.getElementById('login-pass').value;
@@ -278,10 +269,8 @@
             catch (e) { showErr('login-error', 'Неверный ник или пароль.'); }
         };
 
-        // Выход
         document.getElementById('btn-logout').onclick = () => { signOut(auth); location.reload(); };
 
-        // Состояние входа
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('auth-screen').classList.add('hidden');
@@ -293,10 +282,13 @@
                     currentUserDoc = docSnap.data();
                     document.getElementById('welcome-text').innerText = currentUserDoc.username;
                     document.getElementById('balance-amount').innerText = currentUserDoc.balance.toFixed(2);
-                    
                     document.getElementById('player-avatar').src = `https://minotar.net/helm/${currentUserDoc.username}/100.png`;
                     
-                    if(currentUserDoc.role === 'banker') document.getElementById('admin-panel').classList.remove('hidden');
+                    // Показываем плашку БАНКИР и саму панель
+                    if(currentUserDoc.role === 'banker') {
+                        document.getElementById('role-badge').classList.remove('hidden');
+                        document.getElementById('admin-panel').classList.remove('hidden');
+                    }
                 }
                 loadBankSettings();
                 loadHistory();
@@ -306,7 +298,6 @@
             }
         });
 
-        // Перевод
         document.getElementById('btn-transfer').onclick = async () => {
             if (!currentUserDoc) return;
             const receiverRaw = document.getElementById('transfer-receiver').value.trim();
@@ -354,7 +345,6 @@
             }
         };
 
-        // История
         async function loadHistory() {
             const list = document.getElementById('history-list');
             list.innerHTML = '<div class="text-center mt-10"><span class="animate-pulse">Загрузка данных...</span></div>';
@@ -373,7 +363,6 @@
                 const color = isIncoming ? 'text-emerald-600 bg-emerald-50' : 'text-slate-700 bg-slate-50';
                 const sign = isIncoming ? '+' : '-';
                 const otherUser = isIncoming ? tx.sender : tx.receiver;
-                // Иконка руды для Банка, или голова для игрока
                 const headImg = otherUser === "BANK" ? "https://minecraft.wiki/images/Diamond_Ore_%28texture%29_JE5_BE5.png" : `https://minotar.net/helm/${otherUser}/50.png`;
 
                 list.innerHTML += `
@@ -390,7 +379,7 @@
             });
         }
 
-        // Админка
+        // --- ЛОГИКА АДМИН ПАНЕЛИ ---
         document.getElementById('admin-comm-slider').oninput = (e) => document.getElementById('comm-val').innerText = e.target.value + '%';
 
         document.getElementById('btn-commission').onclick = async () => {
@@ -401,25 +390,42 @@
             loadBankSettings();
         };
 
-        document.getElementById('btn-topup').onclick = async () => {
+        // Общая функция для Выдачи и Списания АР Банкиром
+        async function managePlayerBalance(action) {
             if (currentUserDoc.role !== 'banker') return;
             const userRaw = document.getElementById('admin-user').value.trim().toLowerCase();
             const amount = parseFloat(document.getElementById('admin-amount').value);
             
-            if(!userRaw || !amount) return alert('Введите ник и сумму');
+            if(!userRaw || !amount || amount <= 0) return alert('Введите ник и сумму (больше 0)');
+            
             try {
                 const userRef = doc(db, "users", userRaw);
                 const userSnap = await getDoc(userRef);
-                if (!userSnap.exists()) return alert('Счет игрока не найден (пусть зарегистрируется на сайте)');
+                if (!userSnap.exists()) return alert('Счет игрока не найден!');
                 
-                await updateDoc(userRef, { balance: userSnap.data().balance + amount });
-                await addDoc(collection(db, "transactions"), { sender: "BANK", receiver: userSnap.data().username, amount, date: Date.now() });
+                let currentBalance = userSnap.data().balance;
                 
-                alert(`Успешно начислено ${amount} АР игроку ${userSnap.data().username}!`);
+                if(action === 'add') {
+                    // Выдача
+                    await updateDoc(userRef, { balance: currentBalance + amount });
+                    await addDoc(collection(db, "transactions"), { sender: "BANK", receiver: userSnap.data().username, amount: amount, date: Date.now() });
+                    alert(`Успешно выдано ${amount} АР игроку ${userSnap.data().username}!`);
+                } else if(action === 'remove') {
+                    // Списание
+                    if(currentBalance < amount) return alert(`У игрока недостаточно АР! (Его баланс: ${currentBalance})`);
+                    await updateDoc(userRef, { balance: currentBalance - amount });
+                    // Если списывает банк, то отправителем в истории становится игрок, а получателем Банк
+                    await addDoc(collection(db, "transactions"), { sender: userSnap.data().username, receiver: "BANK", amount: amount, date: Date.now() });
+                    alert(`Успешно списано ${amount} АР со счета ${userSnap.data().username}!`);
+                }
+                
                 document.getElementById('admin-user').value = '';
                 document.getElementById('admin-amount').value = '';
             } catch (e) { alert('Ошибка: ' + e.message); }
-        };
+        }
+
+        document.getElementById('btn-topup').onclick = () => managePlayerBalance('add');
+        document.getElementById('btn-withdraw').onclick = () => managePlayerBalance('remove');
     </script>
 </body>
 </html>
