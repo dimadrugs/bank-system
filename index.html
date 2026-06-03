@@ -13,6 +13,7 @@
         @keyframes modalFade { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         .scrollbar-thin::-webkit-scrollbar { width: 6px; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+        .pixelated { image-rendering: pixelated; }
     </style>
 </head>
 <body class="text-slate-800">
@@ -20,13 +21,13 @@
     <!-- ЭКРАН ВХОДА -->
     <div id="auth-screen" class="min-h-screen flex items-center justify-center fade-in">
         <div class="bg-white p-8 rounded-2xl shadow-xl w-96 text-center border-t-4 border-blue-600">
-            <img src="https://minecraft.wiki/images/Diamond_Ore_%28texture%29_JE5_BE5.png" class="w-20 h-20 mx-auto mb-4 drop-shadow-md" style="image-rendering: pixelated;">
+            <img src="https://minecraft.wiki/images/Diamond_Ore_%28texture%29_JE5_BE5.png" class="w-20 h-20 mx-auto mb-4 drop-shadow-md pixelated">
             <h1 class="text-3xl font-bold text-blue-900 mb-2">AR Bank</h1>
             <p class="text-slate-500 mb-8">Экономика сервера</p>
             <input id="login-user" type="text" placeholder="Никнейм в игре" class="w-full mb-4 px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50">
             <input id="login-pass" type="password" placeholder="Пароль" class="w-full mb-6 px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50">
             <button id="btn-login" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-lg mb-4">Войти</button>
-            <div class="text-sm text-slate-500">Нет аккаунта? <button onclick="toggleModal('register-modal', true)" class="text-blue-600 font-bold hover:underline">Создать счет</button></div>
+            <div class="text-sm text-slate-500">Нет счета? <button onclick="toggleModal('register-modal', true)" class="text-blue-600 font-bold hover:underline">Создать</button></div>
             <p id="login-error" class="text-red-500 mt-4 text-sm hidden font-medium"></p>
         </div>
     </div>
@@ -43,20 +44,22 @@
         </div>
     </div>
 
-    <!-- ОСНОВНОЙ ИНТЕРФЕЙС (После входа) -->
+    <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
     <div id="main-interface" class="hidden min-h-screen">
         <!-- НАВИГАЦИЯ -->
         <header class="bg-blue-700 text-white shadow-md sticky top-0 z-40">
             <div class="max-w-6xl mx-auto px-6 flex justify-between items-center h-16">
                 <div class="flex items-center gap-6">
                     <div class="flex items-center gap-2 mr-4">
-                        <img src="https://minecraft.wiki/images/Diamond_Ore_%28texture%29_JE5_BE5.png" class="w-8 h-8" style="image-rendering: pixelated;">
+                        <img src="https://minecraft.wiki/images/Diamond_Ore_%28texture%29_JE5_BE5.png" class="w-8 h-8 pixelated">
                         <h2 class="text-xl font-bold">AR Bank</h2>
                     </div>
-                    <!-- Вкладки -->
                     <button onclick="nav('dashboard')" id="tab-dashboard" class="nav-tab font-semibold py-5 border-b-4 border-transparent hover:text-blue-200 transition">Мой счет</button>
                     <button onclick="nav('shops')" id="tab-shops" class="nav-tab font-semibold py-5 border-b-4 border-transparent hover:text-blue-200 transition">Маркетплейс</button>
-                    <button onclick="nav('control')" id="tab-control" class="nav-tab font-semibold py-5 border-b-4 border-transparent hover:text-blue-200 transition hidden text-emerald-300">Панель Управления</button>
+                    <!-- Вкладка Владельца магазина -->
+                    <button onclick="nav('myshop')" id="tab-myshop" class="nav-tab font-semibold py-5 border-b-4 border-transparent hover:text-amber-200 transition hidden text-amber-300">Мой Магазин</button>
+                    <!-- Вкладка Админа/Банкира -->
+                    <button onclick="nav('control')" id="tab-control" class="nav-tab font-semibold py-5 border-b-4 border-transparent hover:text-emerald-200 transition hidden text-emerald-300">Панель Управления</button>
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-3 bg-blue-800 px-3 py-1.5 rounded-lg border border-blue-600">
@@ -71,13 +74,14 @@
             </div>
         </header>
 
-        <div class="max-w-6xl mx-auto px-6 py-8">
+        <div class="max-w-6xl mx-auto px-6 py-8 relative">
+            
             <!-- ЭКРАН 1: ЛИЧНЫЙ СЧЕТ -->
             <div id="screen-dashboard" class="screen-section fade-in">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="md:col-span-2 space-y-6">
                         <!-- Баланс -->
-                        <div class="bg-white rounded-2xl shadow-lg p-8 border-l-8 border-blue-500 relative overflow-hidden">
+                        <div class="bg-white rounded-2xl shadow-lg p-8 border-l-8 border-blue-500">
                             <p class="text-slate-500 text-sm font-semibold uppercase tracking-wider mb-1">Доступный баланс</p>
                             <div class="flex items-end gap-2">
                                 <span id="balance-amount" class="text-6xl font-extrabold text-slate-800 tracking-tight">0</span>
@@ -91,12 +95,12 @@
                                 <input id="transfer-receiver" type="text" placeholder="Ник получателя" class="w-1/2 px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 bg-slate-50">
                                 <input id="transfer-amount" type="number" placeholder="Сумма АР" class="w-1/2 px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 bg-slate-50">
                             </div>
-                            <p class="text-sm text-slate-500 mb-4">Комиссия перевода: <span id="commission-rate" class="font-bold text-blue-600">5%</span></p>
+                            <p class="text-sm text-slate-500 mb-4">Комиссия банка: <span id="commission-rate" class="font-bold text-blue-600">5%</span></p>
                             <button id="btn-transfer" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition shadow-md">Отправить перевод</button>
                             <p id="transfer-msg" class="mt-4 text-sm text-center font-medium hidden"></p>
                         </div>
                     </div>
-                    <!-- История -->
+                    <!-- История (С ГОЛОВАМИ) -->
                     <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col h-[450px]">
                         <h3 class="text-xl font-bold text-slate-800 mb-4 pb-2 border-b">Моя история</h3>
                         <div id="history-list" class="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin"></div>
@@ -104,27 +108,67 @@
                 </div>
             </div>
 
-            <!-- ЭКРАН 2: МАРКЕТПЛЕЙС (МАГАЗИНЫ И ДОСТАВКА) -->
+            <!-- ЭКРАН 2: МАРКЕТПЛЕЙС -->
             <div id="screen-shops" class="screen-section hidden fade-in">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 class="text-3xl font-bold text-slate-800">Маркетплейс</h2>
-                        <p class="text-slate-500 mt-1">Покупайте товары с доставкой прямо в руки</p>
-                    </div>
+                <div id="marketplace-main">
+                    <h2 class="text-3xl font-bold text-slate-800 mb-2">Маркетплейс</h2>
+                    <p class="text-slate-500 mb-6 border-b pb-4">Магазины игроков. Доставка в любую точку за 2 АР.</p>
+                    <div id="shops-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
                 </div>
-                <!-- Список магазинов -->
-                <div id="shops-list" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- Магазины рендерятся тут -->
+                
+                <!-- Витрина конкретного магазина (Открывается при клике на магазин) -->
+                <div id="marketplace-storefront" class="hidden">
+                    <button onclick="closeStorefront()" class="mb-6 text-blue-600 font-bold flex items-center gap-2 hover:underline">
+                        &larr; Назад к списку магазинов
+                    </button>
+                    <div class="bg-white rounded-2xl shadow-lg p-8 mb-6 flex items-center gap-6">
+                        <img id="sf-logo" src="" class="w-24 h-24 rounded-xl object-cover bg-slate-100 shadow">
+                        <div>
+                            <h2 id="sf-name" class="text-3xl font-bold text-slate-800">Название</h2>
+                            <p id="sf-desc" class="text-slate-500 mt-2">Описание</p>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Товары:</h3>
+                    <div id="sf-items-list" class="grid grid-cols-1 md:grid-cols-4 gap-6"></div>
                 </div>
             </div>
 
-            <!-- ЭКРАН 3: ПАНЕЛЬ УПРАВЛЕНИЯ (ADMIN / BANKER) -->
+            <!-- ЭКРАН 3: УПРАВЛЕНИЕ СВОИМ МАГАЗИНОМ -->
+            <div id="screen-myshop" class="screen-section hidden fade-in">
+                <div class="bg-white rounded-2xl shadow-lg p-8 mb-6 border-t-4 border-amber-500">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6">Управление магазином</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div>
+                            <label class="text-sm font-bold text-slate-500">Название магазина</label>
+                            <input id="myshop-name" type="text" class="w-full mt-1 px-4 py-2 border rounded bg-slate-50">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="text-sm font-bold text-slate-500">Описание</label>
+                            <input id="myshop-desc" type="text" class="w-full mt-1 px-4 py-2 border rounded bg-slate-50">
+                        </div>
+                        <div class="md:col-span-3">
+                            <label class="text-sm font-bold text-slate-500">Ссылка на картинку логотипа (URL)</label>
+                            <input id="myshop-logo" type="text" placeholder="https://..." class="w-full mt-1 px-4 py-2 border rounded bg-slate-50">
+                        </div>
+                    </div>
+                    <button id="btn-save-myshop" class="bg-amber-500 text-white font-bold px-6 py-2 rounded-lg hover:bg-amber-600 transition shadow">Сохранить настройки</button>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-8">
+                    <div class="flex justify-between items-center mb-6 border-b pb-4">
+                        <h3 class="text-xl font-bold text-slate-800">Ассортимент товаров</h3>
+                        <button onclick="openEditItemModal()" class="bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg hover:bg-emerald-600 transition shadow">+ Добавить товар</button>
+                    </div>
+                    <div id="myshop-items-list" class="grid grid-cols-1 md:grid-cols-4 gap-6"></div>
+                </div>
+            </div>
+
+            <!-- ЭКРАН 4: ПАНЕЛЬ УПРАВЛЕНИЯ (ADMIN / BANKER) -->
             <div id="screen-control" class="screen-section hidden fade-in">
                 <div class="bg-slate-900 rounded-3xl shadow-2xl p-8 text-white border border-slate-700">
                     <h2 class="text-2xl font-black text-emerald-400 mb-6 border-b border-slate-700 pb-4">Терминал Управления</h2>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <!-- Выдача / Снятие (Доступно Banker и Admin) -->
                         <div class="bg-slate-800 p-6 rounded-2xl border border-slate-600">
                             <h4 class="font-bold mb-5 text-blue-400">Управление счетом игрока</h4>
                             <input id="admin-user" type="text" placeholder="Никнейм игрока" class="w-full mb-3 px-4 py-3 border border-slate-600 rounded-xl bg-slate-900 text-white outline-none">
@@ -137,22 +181,25 @@
 
                         <!-- Настройки (ТОЛЬКО ADMIN) -->
                         <div id="admin-only-settings" class="bg-slate-800 p-6 rounded-2xl border border-slate-600 hidden flex flex-col justify-between">
-                            <div>
-                                <h4 class="font-bold mb-4 text-amber-400">Комиссия Банка</h4>
-                                <div class="flex items-center gap-4 mb-4">
-                                    <input id="admin-comm-slider" type="range" min="0" max="30" step="1" class="w-full">
-                                    <span id="comm-val" class="font-black text-2xl text-amber-400 w-12">5%</span>
+                            <!-- Казна банка -->
+                            <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 mb-4 flex justify-between items-center">
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Казна Банка</h4>
+                                    <p class="text-xs text-slate-500">Доход от доставки</p>
                                 </div>
-                                <button id="btn-commission" class="w-full bg-slate-700 hover:bg-slate-600 py-2 rounded-lg font-bold transition">Применить комиссию</button>
+                                <div class="text-2xl font-black text-emerald-400"><span id="bank-treasury">0</span> АР</div>
                             </div>
-                            <div class="mt-6 border-t border-slate-700 pt-4">
-                                <h4 class="font-bold mb-3 text-amber-400">Создать магазин</h4>
-                                <button onclick="toggleModal('shop-modal', true)" class="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded-lg font-bold transition">Добавить магазин на маркет</button>
+                            
+                            <div>
+                                <h4 class="font-bold mb-2 text-amber-400">Создать магазин игроку</h4>
+                                <input id="new-shop-name" type="text" placeholder="Название магазина" class="w-full mb-2 px-3 py-2 text-sm border border-slate-600 rounded bg-slate-900">
+                                <input id="new-shop-owner" type="text" placeholder="Ник владельца" class="w-full mb-3 px-3 py-2 text-sm border border-slate-600 rounded bg-slate-900">
+                                <button id="btn-create-shop" class="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded font-bold transition text-sm">Добавить магазин</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Таблица всех пользователей (ТОЛЬКО ADMIN) -->
+                    <!-- База игроков (ТОЛЬКО ADMIN) -->
                     <div id="admin-users-list" class="mt-8 bg-slate-800 p-6 rounded-2xl border border-slate-600 hidden">
                         <h4 class="font-bold mb-4 text-amber-400">База игроков</h4>
                         <div class="max-h-64 overflow-y-auto scrollbar-thin">
@@ -165,9 +212,9 @@
                         </div>
                     </div>
 
-                    <!-- Список заказов на доставку (BANKER & ADMIN) -->
+                    <!-- Заказы -->
                     <div class="mt-8 bg-slate-800 p-6 rounded-2xl border border-slate-600">
-                        <h4 class="font-bold mb-4 text-emerald-400">Заказы на доставку (Ожидают выполнения)</h4>
+                        <h4 class="font-bold mb-4 text-emerald-400">Активные заказы на доставку</h4>
                         <div id="orders-list" class="space-y-3 max-h-64 overflow-y-auto scrollbar-thin"></div>
                     </div>
                 </div>
@@ -175,46 +222,62 @@
         </div>
     </div>
 
-    <!-- ОКНО СОЗДАНИЯ МАГАЗИНА (Только Админ) -->
-    <div id="shop-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 flex items-center justify-center hidden z-50">
-        <div class="bg-white p-8 rounded-2xl w-[400px] relative modal-enter">
-            <button onclick="toggleModal('shop-modal', false)" class="absolute top-4 right-4 text-slate-400 font-bold">&times;</button>
-            <h2 class="text-xl font-bold mb-4">Новый магазин</h2>
-            <input id="shop-name" type="text" placeholder="Название магазина" class="w-full mb-3 px-4 py-2 border rounded bg-slate-50">
-            <input id="shop-desc" type="text" placeholder="Что продают? (Кратко)" class="w-full mb-3 px-4 py-2 border rounded bg-slate-50">
-            <input id="shop-owner" type="text" placeholder="Ник владельца (ему пойдут АР)" class="w-full mb-4 px-4 py-2 border rounded bg-slate-50">
-            <button id="btn-create-shop" class="w-full bg-emerald-500 text-white font-bold py-3 rounded-lg hover:bg-emerald-600 transition">Добавить</button>
-        </div>
-    </div>
-
-    <!-- ОКНО ОФОРМЛЕНИЯ ЗАКАЗА -->
+    <!-- ОКНО ЗАКАЗА ТОВАРА -->
     <div id="order-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 flex items-center justify-center hidden z-50">
         <div class="bg-white p-8 rounded-2xl w-[450px] relative modal-enter">
             <button onclick="toggleModal('order-modal', false)" class="absolute top-4 right-4 text-slate-400 font-bold">&times;</button>
-            <h2 class="text-2xl font-bold mb-1" id="order-shop-name">Оформление заказа</h2>
-            <p class="text-sm text-slate-500 mb-4 border-b pb-2">Стоимость доставки (курьеру банка): <span class="font-bold text-blue-600" id="delivery-fee">5 АР</span></p>
+            <h2 class="text-2xl font-bold mb-1">Оформление заказа</h2>
+            <p class="text-sm text-slate-500 mb-4 border-b pb-2">Магазин: <b id="order-shop-name" class="text-slate-800">...</b></p>
             
-            <input id="order-item" type="text" placeholder="Что вы покупаете?" class="w-full mb-3 px-4 py-3 border rounded-lg bg-slate-50">
-            <input id="order-price" type="number" placeholder="Цена за товар (в АР)" class="w-full mb-3 px-4 py-3 border rounded-lg bg-slate-50" oninput="updateTotal()">
+            <!-- Данные о товаре (Заблокированы для редактирования) -->
+            <div class="bg-slate-50 p-4 rounded-xl border mb-4 flex items-center gap-4">
+                <img id="order-item-img" src="" class="w-16 h-16 rounded object-cover shadow-sm bg-white">
+                <div>
+                    <p id="order-item-name" class="font-bold text-lg text-slate-800">Товар</p>
+                    <p class="text-sm text-slate-500">Цена: <b id="order-item-price" class="text-blue-600 text-lg">0</b> АР</p>
+                </div>
+            </div>
             
+            <p class="font-bold text-sm text-slate-700 mb-2">Куда доставить?</p>
             <div class="flex gap-2 mb-3">
                 <input id="order-x" type="number" placeholder="X" class="w-1/3 px-3 py-2 border rounded-lg bg-slate-50">
                 <input id="order-y" type="number" placeholder="Y" class="w-1/3 px-3 py-2 border rounded-lg bg-slate-50">
                 <input id="order-z" type="number" placeholder="Z" class="w-1/3 px-3 py-2 border rounded-lg bg-slate-50">
             </div>
-            
-            <select id="order-dim" class="w-full mb-4 px-4 py-3 border rounded-lg bg-slate-50 text-slate-700">
+            <select id="order-dim" class="w-full mb-4 px-4 py-3 border rounded-lg bg-slate-50 text-slate-700 font-medium">
                 <option value="overworld">Обычный мир (Overworld)</option>
                 <option value="nether">Незер (Nether)</option>
-                <option value="end">Энд (The End)</option>
+                <!-- Энд убран -->
             </select>
 
-            <div class="bg-slate-100 p-3 rounded-lg mb-4 text-center font-bold text-lg">
-                Итого к оплате: <span id="order-total" class="text-blue-600">0</span> АР
+            <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-6">
+                <div class="flex justify-between text-sm mb-1"><span class="text-slate-600">Стоимость товара:</span> <b id="summary-price">0 АР</b></div>
+                <div class="flex justify-between text-sm mb-2 pb-2 border-b border-blue-200"><span class="text-slate-600">Доставка (в Казну):</span> <b>2 АР</b></div>
+                <div class="flex justify-between text-lg font-black text-blue-800"><span>ИТОГО К ОПЛАТЕ:</span> <span id="summary-total">0 АР</span></div>
             </div>
 
-            <button id="btn-submit-order" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">Оплатить и заказать</button>
-            <p id="order-error" class="text-red-500 text-sm mt-3 hidden text-center"></p>
+            <button id="btn-submit-order" class="w-full bg-emerald-500 text-white font-bold py-3 rounded-xl hover:bg-emerald-600 transition shadow">Оплатить заказ</button>
+            <p id="order-error" class="text-red-500 text-sm mt-3 hidden text-center font-bold"></p>
+        </div>
+    </div>
+
+    <!-- ОКНО ДОБАВЛЕНИЯ/РЕДАКТИРОВАНИЯ ТОВАРА (ДЛЯ ВЛАДЕЛЬЦА) -->
+    <div id="edit-item-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 flex items-center justify-center hidden z-50">
+        <div class="bg-white p-8 rounded-2xl w-[400px] relative modal-enter">
+            <button onclick="toggleModal('edit-item-modal', false)" class="absolute top-4 right-4 text-slate-400 font-bold">&times;</button>
+            <h2 class="text-xl font-bold mb-4" id="item-modal-title">Добавить товар</h2>
+            <input type="hidden" id="edit-item-id">
+            
+            <label class="text-xs font-bold text-slate-500">Название товара</label>
+            <input id="edit-item-name" type="text" class="w-full mb-3 px-3 py-2 border rounded bg-slate-50">
+            
+            <label class="text-xs font-bold text-slate-500">Цена (АР)</label>
+            <input id="edit-item-price" type="number" class="w-full mb-3 px-3 py-2 border rounded bg-slate-50">
+            
+            <label class="text-xs font-bold text-slate-500">Ссылка на фото (URL)</label>
+            <input id="edit-item-img" type="text" placeholder="https://..." class="w-full mb-5 px-3 py-2 border rounded bg-slate-50">
+            
+            <button id="btn-save-item" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">Сохранить товар</button>
         </div>
     </div>
 
@@ -222,7 +285,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, getDocs, runTransaction, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, getDocs, runTransaction, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB3unvYcGKFLk6RDTl1t39_P4NZMqJxkE8",
@@ -239,29 +302,37 @@
 
         let currentUserDoc = null;
         let globalCommission = 5;
-        const DELIVERY_FEE = 5; // Фиксированная цена доставки
-        let selectedShop = null;
+        const DELIVERY_FEE = 2; // Фиксированная доставка 2 АР
+        
+        let allShops = [];
+        let myShopDoc = null; // Данные магазина текущего пользователя
+        let buyingItem = null; // Выбранный товар для покупки
 
         // Вспомогательные
         const getEmail = (user) => `${user.toLowerCase()}@arbank.ru`;
         window.toggleModal = (id, show) => { document.getElementById(id).classList.toggle('hidden', !show); };
+        
         window.nav = (screenId) => {
             document.querySelectorAll('.screen-section').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('border-white'));
             document.getElementById(`screen-${screenId}`).classList.remove('hidden');
             document.getElementById(`tab-${screenId}`).classList.add('border-white');
-            if(screenId === 'shops') loadShops();
-            if(screenId === 'control') { loadOrders(); if(currentUserDoc.role === 'admin') loadAllUsers(); }
+            
+            if(screenId === 'shops') { document.getElementById('marketplace-main').classList.remove('hidden'); document.getElementById('marketplace-storefront').classList.add('hidden'); loadShops(); }
+            if(screenId === 'myshop') loadMyShop();
+            if(screenId === 'control') { loadOrders(); if(currentUserDoc.role === 'admin') { loadAllUsers(); loadBankSettings(); } }
         };
 
-        // Загрузка
+        // Загрузка настроек и Казны
         async function loadBankSettings() {
             const snap = await getDoc(doc(db, "settings", "bank"));
-            if(snap.exists()) globalCommission = snap.data().commission;
-            else await setDoc(doc(db, "settings", "bank"), { commission: 5 });
+            if(snap.exists()) {
+                globalCommission = snap.data().commission || 5;
+                if(document.getElementById('bank-treasury')) document.getElementById('bank-treasury').innerText = (snap.data().revenue || 0).toFixed(2);
+            } else {
+                await setDoc(doc(db, "settings", "bank"), { commission: 5, revenue: 0 });
+            }
             document.getElementById('commission-rate').innerText = globalCommission + '%';
-            document.getElementById('comm-val').innerText = globalCommission + '%';
-            document.getElementById('admin-comm-slider').value = globalCommission;
         }
 
         // АВТОРИЗАЦИЯ
@@ -279,7 +350,6 @@
                     document.getElementById('balance-amount').innerText = currentUserDoc.balance.toFixed(2);
                     document.getElementById('player-avatar').src = `https://minotar.net/helm/${currentUserDoc.username}/100.png`;
                     
-                    // Проверка ролей
                     const badge = document.getElementById('role-badge');
                     const tabControl = document.getElementById('tab-control');
                     
@@ -288,11 +358,17 @@
                         badge.classList.remove('hidden');
                         badge.innerText = currentUserDoc.role === 'admin' ? 'Администратор' : 'Банкир';
                         badge.className = `text-[9px] font-bold uppercase ${currentUserDoc.role==='admin'?'text-red-400':'text-amber-400'}`;
-                        
                         if(currentUserDoc.role === 'admin') {
                             document.getElementById('admin-only-settings').classList.remove('hidden');
                             document.getElementById('admin-users-list').classList.remove('hidden');
                         }
+                    }
+
+                    // Проверка, есть ли у игрока магазин
+                    const shopsQ = query(collection(db, "shops"), where("owner", "==", currentUserDoc.username.toLowerCase()));
+                    const myShopsSnap = await getDocs(shopsQ);
+                    if(!myShopsSnap.empty) {
+                        document.getElementById('tab-myshop').classList.remove('hidden');
                     }
                 }
                 loadBankSettings(); loadHistory(); nav('dashboard');
@@ -305,12 +381,24 @@
         document.getElementById('btn-login').onclick = async () => {
             const u = document.getElementById('login-user').value.trim();
             const p = document.getElementById('login-pass').value;
-            try { await signInWithEmailAndPassword(auth, getEmail(u), p); } 
-            catch { document.getElementById('login-error').innerText="Ошибка входа"; document.getElementById('login-error').style.display='block'; }
+            try { await signInWithEmailAndPassword(auth, getEmail(u), p); } catch { document.getElementById('login-error').style.display='block'; document.getElementById('login-error').innerText="Ошибка входа"; }
         };
         document.getElementById('btn-logout').onclick = () => { signOut(auth); location.reload(); };
 
-        // ИСТОРИЯ
+        document.getElementById('btn-register').onclick = async () => {
+            const u = document.getElementById('reg-user').value.trim();
+            const p = document.getElementById('reg-pass').value;
+            if (u.length < 3 || p.length < 6) return alert('Ник от 3 букв, пароль от 6.');
+            try {
+                const docSnap = await getDoc(doc(db, "users", u.toLowerCase()));
+                if (docSnap.exists()) return alert('Счет с таким ником уже существует!');
+                await createUserWithEmailAndPassword(auth, getEmail(u), p);
+                await setDoc(doc(db, "users", u.toLowerCase()), { username: u, balance: 0, role: 'player' });
+                alert('Успешно! Входим...'); toggleModal('register-modal', false);
+            } catch (e) { alert('Ошибка регистрации.'); }
+        };
+
+        // ИСТОРИЯ (С ВОЗВРАТОМ ГОЛОВ)
         async function loadHistory() {
             const list = document.getElementById('history-list');
             const q1 = query(collection(db, "transactions"), where("sender", "==", currentUserDoc.username));
@@ -322,109 +410,298 @@
             txs.forEach(tx => {
                 const isInc = tx.receiver === currentUserDoc.username;
                 const sign = isInc ? '+' : '-';
-                const col = isInc ? 'text-emerald-600 bg-emerald-50' : 'text-slate-700 bg-slate-50';
-                list.innerHTML += `<div class="p-3 rounded-lg border mb-2 flex justify-between ${col}">
-                    <div><p class="font-bold text-sm">${isInc ? 'От: '+tx.sender : 'Кому: '+tx.receiver}</p></div>
-                    <span class="font-bold">${sign}${tx.amount} АР</span></div>`;
-            });
-        }
+                const col = isInc ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-slate-700 bg-slate-50 border-slate-200';
+                
+                // ГОЛОВЫ
+                const otherUser = isInc ? tx.sender : tx.receiver;
+                // Если это банк или комиссия доставки
+                const headImg = (otherUser === "BANK" || otherUser === "BANK_DELIVERY") 
+                    ? "https://minecraft.wiki/images/Diamond_Ore_%28texture%29_JE5_BE5.png" 
+                    : `https://minotar.net/helm/${otherUser}/50.png`;
 
-        // --- МАРКЕТПЛЕЙС ---
-        async function loadShops() {
-            const list = document.getElementById('shops-list');
-            list.innerHTML = 'Загрузка...';
-            const snap = await getDocs(collection(db, "shops"));
-            list.innerHTML = '';
-            if(snap.empty) list.innerHTML = '<p class="col-span-3 text-center text-slate-400">Магазинов пока нет.</p>';
-            
-            snap.forEach(doc => {
-                const s = doc.data();
+                let title = isInc ? 'От: '+tx.sender : 'Кому: '+tx.receiver;
+                if(otherUser === "BANK_DELIVERY") title = "Оплата доставки";
+
                 list.innerHTML += `
-                    <div class="bg-white p-6 rounded-xl shadow border border-slate-100 hover:shadow-lg transition">
-                        <h3 class="text-xl font-bold text-blue-800">${s.name}</h3>
-                        <p class="text-sm text-slate-500 mb-4 h-10 overflow-hidden">${s.description}</p>
-                        <p class="text-xs text-slate-400 mb-4">Владелец: <b>${s.owner}</b></p>
-                        <button onclick="openOrderModal('${doc.id}', '${s.name}', '${s.owner}')" class="w-full bg-blue-100 text-blue-700 font-bold py-2 rounded hover:bg-blue-200">Перейти к заказу</button>
+                    <div class="p-3 rounded-xl border mb-2 flex justify-between items-center shadow-sm ${col}">
+                        <div class="flex items-center gap-3">
+                            <img src="${headImg}" class="w-8 h-8 rounded shadow-sm ${otherUser.includes('BANK')?'pixelated':''}">
+                            <div>
+                                <p class="font-bold text-sm">${title}</p>
+                                <p class="text-[10px] opacity-70">${new Date(tx.date).toLocaleString([], {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})}</p>
+                            </div>
+                        </div>
+                        <span class="font-bold text-lg">${sign}${tx.amount} АР</span>
                     </div>`;
             });
         }
 
-        window.openOrderModal = (id, name, owner) => {
-            selectedShop = { id, name, owner };
-            document.getElementById('order-shop-name').innerText = `Заказ: ${name}`;
-            document.getElementById('order-price').value = '';
-            document.getElementById('order-item').value = '';
-            document.getElementById('order-total').innerText = '0';
+        // ОБЫЧНЫЙ ПЕРЕВОД
+        document.getElementById('btn-transfer').onclick = async () => {
+            const receiverRaw = document.getElementById('transfer-receiver').value.trim();
+            const amount = parseFloat(document.getElementById('transfer-amount').value);
+            const err = document.getElementById('transfer-msg');
+            
+            if(!receiverRaw || !amount || amount <= 0) return;
+            const commissionAmount = amount * (globalCommission / 100);
+            const total = amount + commissionAmount;
+            
+            try {
+                await runTransaction(db, async (t) => {
+                    const senderRef = doc(db, "users", currentUserDoc.username.toLowerCase());
+                    const recRef = doc(db, "users", receiverRaw.toLowerCase());
+                    const sSnap = await t.get(senderRef);
+                    const rSnap = await t.get(recRef);
+                    
+                    if(!rSnap.exists()) throw "Получатель не найден!";
+                    if(sSnap.data().balance < total) throw "Недостаточно АР (с учетом комиссии)";
+                    
+                    t.update(senderRef, { balance: sSnap.data().balance - total });
+                    t.update(recRef, { balance: rSnap.data().balance + amount });
+                    t.set(doc(collection(db, "transactions")), { sender: sSnap.data().username, receiver: rSnap.data().username, amount, date: Date.now() });
+                });
+                err.innerText = "Успешно!"; err.className = "mt-4 text-sm text-center font-bold text-emerald-500 block";
+                document.getElementById('transfer-amount').value = ''; document.getElementById('transfer-receiver').value = '';
+                const n = await getDoc(doc(db, "users", currentUserDoc.username.toLowerCase()));
+                document.getElementById('balance-amount').innerText = n.data().balance.toFixed(2);
+                loadHistory();
+            } catch(e) { err.innerText = e; err.className = "mt-4 text-sm text-center font-bold text-red-500 block"; }
+            setTimeout(() => err.style.display='none', 4000);
+        };
+
+        // --- МАРКЕТПЛЕЙС (ПОКУПАТЕЛЬ) ---
+        async function loadShops() {
+            const list = document.getElementById('shops-list');
+            list.innerHTML = '';
+            const snap = await getDocs(collection(db, "shops"));
+            allShops = [];
+            snap.forEach(d => {
+                const s = { id: d.id, ...d.data() };
+                allShops.push(s);
+                const logo = s.logo || "https://minecraft.wiki/images/Chest_JE4.png";
+                list.innerHTML += `
+                    <div onclick="openStorefront('${s.id}')" class="bg-white p-6 rounded-2xl shadow border border-slate-100 hover:shadow-xl hover:border-blue-300 transition cursor-pointer flex flex-col items-center text-center">
+                        <img src="${logo}" class="w-20 h-20 object-cover rounded-xl mb-4 shadow-sm">
+                        <h3 class="text-xl font-bold text-slate-800">${s.name}</h3>
+                        <p class="text-sm text-slate-500 mt-2 line-clamp-2">${s.description}</p>
+                    </div>`;
+            });
+        }
+
+        window.openStorefront = (shopId) => {
+            const s = allShops.find(x => x.id === shopId);
+            if(!s) return;
+            selectedShop = s;
+            document.getElementById('marketplace-main').classList.add('hidden');
+            document.getElementById('marketplace-storefront').classList.remove('hidden');
+            
+            document.getElementById('sf-logo').src = s.logo || "https://minecraft.wiki/images/Chest_JE4.png";
+            document.getElementById('sf-name').innerText = s.name;
+            document.getElementById('sf-desc').innerText = s.description;
+            
+            const list = document.getElementById('sf-items-list');
+            list.innerHTML = '';
+            const items = s.items || [];
+            
+            if(items.length === 0) list.innerHTML = '<p class="text-slate-400">Товаров пока нет.</p>';
+            
+            items.forEach((item, idx) => {
+                const img = item.img || "https://minecraft.wiki/images/Grass_Block_JE4.png";
+                list.innerHTML += `
+                    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-md transition">
+                        <img src="${img}" class="w-full h-32 object-cover bg-slate-100">
+                        <div class="p-4">
+                            <h4 class="font-bold text-slate-800 mb-1 line-clamp-1">${item.name}</h4>
+                            <p class="text-lg font-black text-blue-600 mb-4">${item.price} АР</p>
+                            <button onclick="buyItem(${idx})" class="w-full bg-emerald-100 text-emerald-700 font-bold py-2 rounded hover:bg-emerald-200 transition">Купить</button>
+                        </div>
+                    </div>`;
+            });
+        };
+
+        window.closeStorefront = () => {
+            document.getElementById('marketplace-storefront').classList.add('hidden');
+            document.getElementById('marketplace-main').classList.remove('hidden');
+        };
+
+        // ОТКРЫТИЕ ЗАКАЗА И ПОКУПКА
+        window.buyItem = (itemIdx) => {
+            buyingItem = selectedShop.items[itemIdx];
+            document.getElementById('order-shop-name').innerText = selectedShop.name;
+            
+            document.getElementById('order-item-img').src = buyingItem.img || "https://minecraft.wiki/images/Grass_Block_JE4.png";
+            document.getElementById('order-item-name').innerText = buyingItem.name;
+            document.getElementById('order-item-price').innerText = buyingItem.price;
+            
+            document.getElementById('summary-price').innerText = buyingItem.price + ' АР';
+            document.getElementById('summary-total').innerText = (parseFloat(buyingItem.price) + DELIVERY_FEE) + ' АР';
+            
             toggleModal('order-modal', true);
         };
 
-        window.updateTotal = () => {
-            const p = parseFloat(document.getElementById('order-price').value) || 0;
-            document.getElementById('order-total').innerText = p + DELIVERY_FEE;
-        };
-
         document.getElementById('btn-submit-order').onclick = async () => {
-            const item = document.getElementById('order-item').value;
-            const price = parseFloat(document.getElementById('order-price').value);
             const x = document.getElementById('order-x').value;
             const y = document.getElementById('order-y').value;
             const z = document.getElementById('order-z').value;
             const dim = document.getElementById('order-dim').value;
             const err = document.getElementById('order-error');
 
-            if(!item || !price || !x || !y || !z) { err.innerText="Заполните все поля"; err.classList.remove('hidden'); return; }
+            if(!x || !y || !z) { err.innerText="Введите координаты!"; err.classList.remove('hidden'); return; }
             
-            const total = price + DELIVERY_FEE;
+            const totalDeduction = parseFloat(buyingItem.price) + DELIVERY_FEE;
             document.getElementById('btn-submit-order').disabled = true;
 
             try {
                 await runTransaction(db, async (t) => {
                     const buyerRef = doc(db, "users", currentUserDoc.username.toLowerCase());
-                    const shopOwnerRef = doc(db, "users", selectedShop.owner.toLowerCase());
+                    const ownerRef = doc(db, "users", selectedShop.owner.toLowerCase());
+                    const bankRef = doc(db, "settings", "bank"); // КАЗНА БАНКА
                     
                     const buyerSnap = await t.get(buyerRef);
-                    const ownerSnap = await t.get(shopOwnerRef);
+                    const ownerSnap = await t.get(ownerRef);
+                    const bankSnap = await t.get(bankRef);
 
-                    if(buyerSnap.data().balance < total) throw "Недостаточно АР для оплаты с доставкой";
-                    if(!ownerSnap.exists()) throw "Владелец магазина не найден в базе банка!";
+                    if(buyerSnap.data().balance < totalDeduction) throw "Недостаточно АР для оплаты товара и доставки";
+                    if(!ownerSnap.exists()) throw "Владелец магазина не найден в базе!";
 
-                    // Списываем у покупателя ВСЮ сумму
-                    t.update(buyerRef, { balance: buyerSnap.data().balance - total });
-                    // Начисляем владельцу магазина ТОЛЬКО сумму товара
-                    t.update(shopOwnerRef, { balance: ownerSnap.data().balance + price });
+                    // 1. Снимаем всю сумму с покупателя
+                    t.update(buyerRef, { balance: buyerSnap.data().balance - totalDeduction });
+                    // 2. Отправляем цену товара владельцу магазина
+                    t.update(ownerRef, { balance: ownerSnap.data().balance + parseFloat(buyingItem.price) });
+                    // 3. Отправляем 2 АР (доставку) в казну банка
+                    const currentRevenue = bankSnap.exists() ? (bankSnap.data().revenue || 0) : 0;
+                    t.update(bankRef, { revenue: currentRevenue + DELIVERY_FEE });
                     
-                    // Записываем транзакции
-                    t.set(doc(collection(db, "transactions")), { sender: buyerSnap.data().username, receiver: ownerSnap.data().username, amount: price, date: Date.now() });
+                    // Записи в историю
+                    t.set(doc(collection(db, "transactions")), { sender: buyerSnap.data().username, receiver: ownerSnap.data().username, amount: parseFloat(buyingItem.price), date: Date.now() });
                     t.set(doc(collection(db, "transactions")), { sender: buyerSnap.data().username, receiver: "BANK_DELIVERY", amount: DELIVERY_FEE, date: Date.now() });
                     
-                    // Создаем сам заказ для курьеров
+                    // Создаем заказ для админов
                     t.set(doc(collection(db, "orders")), { 
-                        shopName: selectedShop.name, item, price, customer: buyerSnap.data().username,
-                        coords: `X:${x} Y:${y} Z:${z} (${dim})`, date: Date.now()
+                        shopName: selectedShop.name, item: buyingItem.name, price: buyingItem.price, 
+                        customer: buyerSnap.data().username, coords: `X:${x} Y:${y} Z:${z} (${dim})`, date: Date.now()
                     });
                 });
-                alert("Заказ успешно оплачен и отправлен курьерам!");
+                alert("Успешно оплачено! Ожидайте доставку.");
                 toggleModal('order-modal', false);
-                const newSnap = await getDoc(doc(db, "users", currentUserDoc.username.toLowerCase()));
-                document.getElementById('balance-amount').innerText = newSnap.data().balance.toFixed(2);
+                const n = await getDoc(doc(db, "users", currentUserDoc.username.toLowerCase()));
+                document.getElementById('balance-amount').innerText = n.data().balance.toFixed(2);
                 loadHistory();
             } catch(e) { err.innerText = e; err.classList.remove('hidden'); }
             finally { document.getElementById('btn-submit-order').disabled = false; }
         };
 
-        // --- ADMIN / BANKER LOGIC ---
+        // --- УПРАВЛЕНИЕ СВОИМ МАГАЗИНОМ (ВЛАДЕЛЕЦ) ---
+        async function loadMyShop() {
+            const q = query(collection(db, "shops"), where("owner", "==", currentUserDoc.username.toLowerCase()));
+            const snap = await getDocs(q);
+            if(snap.empty) return; // Не должно произойти
+            
+            myShopDoc = { id: snap.docs[0].id, ...snap.docs[0].data() };
+            document.getElementById('myshop-name').value = myShopDoc.name || "";
+            document.getElementById('myshop-desc').value = myShopDoc.description || "";
+            document.getElementById('myshop-logo').value = myShopDoc.logo || "";
+            
+            renderMyShopItems();
+        }
+
+        function renderMyShopItems() {
+            const list = document.getElementById('myshop-items-list');
+            list.innerHTML = '';
+            const items = myShopDoc.items || [];
+            
+            if(items.length === 0) list.innerHTML = '<p class="text-slate-400">Товаров нет. Добавьте первый!</p>';
+            
+            items.forEach((item, idx) => {
+                const img = item.img || "https://minecraft.wiki/images/Grass_Block_JE4.png";
+                list.innerHTML += `
+                    <div class="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden relative">
+                        <button onclick="deleteMyItem(${idx})" class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 font-bold hover:bg-red-600 shadow">&times;</button>
+                        <img src="${img}" class="w-full h-32 object-cover">
+                        <div class="p-4">
+                            <h4 class="font-bold text-slate-800 mb-1 line-clamp-1">${item.name}</h4>
+                            <p class="text-blue-600 font-bold mb-3">${item.price} АР</p>
+                            <button onclick="openEditItemModal(${idx})" class="w-full bg-slate-200 text-slate-700 py-2 rounded font-bold hover:bg-slate-300">Редактировать</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        document.getElementById('btn-save-myshop').onclick = async () => {
+            const n = document.getElementById('myshop-name').value;
+            const d = document.getElementById('myshop-desc').value;
+            const l = document.getElementById('myshop-logo').value;
+            if(!n) return alert("Имя обязательно!");
+            await updateDoc(doc(db, "shops", myShopDoc.id), { name: n, description: d, logo: l });
+            alert("Настройки сохранены!"); loadMyShop();
+        };
+
+        window.openEditItemModal = (idx = -1) => {
+            if(idx === -1) {
+                document.getElementById('item-modal-title').innerText = "Добавить товар";
+                document.getElementById('edit-item-id').value = "-1";
+                document.getElementById('edit-item-name').value = "";
+                document.getElementById('edit-item-price').value = "";
+                document.getElementById('edit-item-img').value = "";
+            } else {
+                document.getElementById('item-modal-title').innerText = "Редактировать товар";
+                const item = myShopDoc.items[idx];
+                document.getElementById('edit-item-id').value = idx;
+                document.getElementById('edit-item-name').value = item.name;
+                document.getElementById('edit-item-price').value = item.price;
+                document.getElementById('edit-item-img').value = item.img || "";
+            }
+            toggleModal('edit-item-modal', true);
+        };
+
+        document.getElementById('btn-save-item').onclick = async () => {
+            const idx = parseInt(document.getElementById('edit-item-id').value);
+            const name = document.getElementById('edit-item-name').value.trim();
+            const price = parseFloat(document.getElementById('edit-item-price').value);
+            const img = document.getElementById('edit-item-img').value.trim();
+            
+            if(!name || !price || price <= 0) return alert("Введите название и цену");
+
+            let items = myShopDoc.items || [];
+            if(idx === -1) items.push({ name, price, img });
+            else items[idx] = { name, price, img };
+
+            await updateDoc(doc(db, "shops", myShopDoc.id), { items });
+            toggleModal('edit-item-modal', false); loadMyShop();
+        };
+
+        window.deleteMyItem = async (idx) => {
+            if(!confirm("Удалить этот товар?")) return;
+            let items = myShopDoc.items || [];
+            items.splice(idx, 1);
+            await updateDoc(doc(db, "shops", myShopDoc.id), { items });
+            loadMyShop();
+        };
+
+
+        // --- АДМИН ПАНЕЛЬ ---
         async function loadOrders() {
             const list = document.getElementById('orders-list');
             const snap = await getDocs(query(collection(db, "orders"), orderBy("date", "desc")));
             list.innerHTML = snap.empty ? '<p class="text-slate-400">Нет активных заказов.</p>' : '';
             snap.forEach(d => {
                 const o = d.data();
-                list.innerHTML += `<div class="bg-slate-900 p-3 rounded border border-slate-700">
-                    <p class="text-emerald-400 font-bold">${o.shopName} <span class="text-white font-normal">- ${o.item}</span></p>
-                    <p class="text-sm text-slate-300 mt-1">Клиент: <b>${o.customer}</b> | Координаты: <b>${o.coords}</b></p>
+                list.innerHTML += `<div class="bg-slate-900 p-4 rounded-xl border border-slate-700 flex justify-between items-center relative">
+                    <button onclick="completeOrder('${d.id}')" class="absolute top-4 right-4 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white border border-emerald-500/50 px-3 py-1 rounded text-xs font-bold transition">Выполнено</button>
+                    <div>
+                        <p class="text-emerald-400 font-bold mb-1">${o.shopName} <span class="text-white font-normal bg-slate-800 px-2 py-0.5 rounded text-sm ml-2">${o.item}</span></p>
+                        <p class="text-sm text-slate-400">Клиент: <b class="text-slate-200">${o.customer}</b></p>
+                        <p class="text-sm text-slate-400 mt-0.5">Координаты: <b class="text-amber-400 bg-amber-400/10 px-1 rounded">${o.coords}</b></p>
+                    </div>
                 </div>`;
             });
         }
+
+        window.completeOrder = async (orderId) => {
+            if(!confirm("Заказ доставлен игроку?")) return;
+            await deleteDoc(doc(db, "orders", orderId));
+            loadOrders();
+        };
 
         async function loadAllUsers() {
             const tbody = document.getElementById('users-table-body');
@@ -432,27 +709,26 @@
             tbody.innerHTML = '';
             snap.forEach(d => {
                 const u = d.data();
-                tbody.innerHTML += `<tr><td class="p-3 font-bold">${u.username}</td><td class="p-3 text-emerald-400">${u.balance.toFixed(2)}</td><td class="p-3 opacity-50">${u.role}</td></tr>`;
+                tbody.innerHTML += `<tr><td class="p-3 font-bold">${u.username}</td><td class="p-3 text-emerald-400 font-bold">${u.balance.toFixed(2)}</td><td class="p-3 opacity-50">${u.role}</td></tr>`;
             });
         }
 
+        // Создание магазина (Админ)
         document.getElementById('btn-create-shop').onclick = async () => {
-            const n = document.getElementById('shop-name').value;
-            const d = document.getElementById('shop-desc').value;
-            const o = document.getElementById('shop-owner').value;
+            const n = document.getElementById('new-shop-name').value;
+            const o = document.getElementById('new-shop-owner').value.toLowerCase();
             if(!n||!o) return alert("Введите название и владельца");
-            await addDoc(collection(db, "shops"), { name: n, description: d, owner: o });
-            alert("Магазин добавлен!"); toggleModal('shop-modal', false); loadShops();
+            
+            const userSnap = await getDoc(doc(db, "users", o));
+            if(!userSnap.exists()) return alert("Игрок не найден в базе!");
+
+            await addDoc(collection(db, "shops"), { name: n, description: "Новый магазин", owner: o, items: [], logo: "" });
+            alert("Магазин успешно создан! Теперь владелец увидит вкладку 'Мой магазин'.");
+            document.getElementById('new-shop-name').value = '';
+            document.getElementById('new-shop-owner').value = '';
         };
 
-        // Админ-слайдер комиссии
-        document.getElementById('admin-comm-slider').oninput = (e) => document.getElementById('comm-val').innerText = e.target.value + '%';
-        document.getElementById('btn-commission').onclick = async () => {
-            const val = parseInt(document.getElementById('admin-comm-slider').value);
-            await setDoc(doc(db, "settings", "bank"), { commission: val }); alert('Успешно!');
-        };
-
-        // Выдача / Снятие (Для Банкира и Админа)
+        // Выдача / Снятие (Админ/Банкир)
         async function manageBal(action) {
             const uRaw = document.getElementById('admin-user').value.trim().toLowerCase();
             const am = parseFloat(document.getElementById('admin-amount').value);
@@ -471,7 +747,8 @@
                     await updateDoc(ref, { balance: bal - am });
                     await addDoc(collection(db, "transactions"), { sender: snap.data().username, receiver: "BANK", amount: am, date: Date.now() });
                 }
-                alert('Успешно!'); if(currentUserDoc.role === 'admin') loadAllUsers();
+                alert('Успешно!'); document.getElementById('admin-user').value=''; document.getElementById('admin-amount').value='';
+                if(currentUserDoc.role === 'admin') loadAllUsers();
             } catch(e) { alert(e); }
         }
         document.getElementById('btn-topup').onclick = () => manageBal('add');
