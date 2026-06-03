@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Bank - Банк Алмазной Руды</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f4f8; }
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .scene { width: 80px; height: 80px; perspective: 600px; margin: 0 auto; }
+        .cube { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; animation: spin 6s infinite linear; }
+        .face { position: absolute; width: 80px; height: 80px; background-color: #e2e8f0; border: 2px solid #cbd5e1;
+                background-image: radial-gradient(circle at 20% 30%, #38bdf8 4px, transparent 5px),
+                                  radial-gradient(circle at 70% 60%, #0ea5e9 5px, transparent 6px),
+                                  radial-gradient(circle at 40% 80%, #0284c7 3px, transparent 4px);
+                box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
+        .front  { transform: translateZ(40px); } .back   { transform: rotateY(180deg) translateZ(40px); }
+        .right  { transform: rotateY(90deg) translateZ(40px); } .left   { transform: rotateY(-90deg) translateZ(40px); }
+        .top    { transform: rotateX(90deg) translateZ(40px); } .bottom { transform: rotateX(-90deg) translateZ(40px); }
+        @keyframes spin { 0% { transform: rotateX(0deg) rotateY(0deg); } 100% { transform: rotateX(360deg) rotateY(360deg); } }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- ЭКРАН АВТОРИЗАЦИИ -->
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center fade-in">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-96 text-center border-t-4 border-blue-600">
+            <div class="scene mb-6">
+                <div class="cube"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
+            </div>
+            <h1 class="text-3xl font-bold text-blue-900 mb-2">AR Bank</h1>
+            <p class="text-slate-500 mb-6">Надежное хранение Алмазной Руды</p>
+            
+            <input id="auth-user" type="text" placeholder="Никнейм в игре" class="w-full mb-4 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input id="auth-pass" type="password" placeholder="Пароль (от 6 символов)" class="w-full mb-6 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            
+            <button id="btn-login" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition shadow-lg mb-2">Войти</button>
+            <button id="btn-register" class="w-full bg-slate-100 text-slate-600 font-semibold py-2 rounded-lg hover:bg-slate-200 transition">Зарегистрироваться</button>
+            <p id="auth-error" class="text-red-500 mt-3 text-sm hidden"></p>
+        </div>
+    </div>
+
+    <!-- ЭКРАН УПРАВЛЕНИЯ -->
+    <div id="bank-screen" class="hidden min-h-screen fade-in">
+        <header class="bg-blue-700 text-white shadow-md">
+            <div class="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="scene" style="width: 40px; height: 40px;">
+                        <div class="cube" style="animation-duration: 10s;">
+                            <div class="face front" style="width:40px; height:40px; transform: translateZ(20px);"></div><div class="face back" style="width:40px; height:40px; transform: rotateY(180deg) translateZ(20px);"></div>
+                            <div class="face right" style="width:40px; height:40px; transform: rotateY(90deg) translateZ(20px);"></div><div class="face left" style="width:40px; height:40px; transform: rotateY(-90deg) translateZ(20px);"></div>
+                            <div class="face top" style="width:40px; height:40px; transform: rotateX(90deg) translateZ(20px);"></div><div class="face bottom" style="width:40px; height:40px; transform: rotateX(-90deg) translateZ(20px);"></div>
+                        </div>
+                    </div>
+                    <h2 class="text-2xl font-bold">AR Bank</h2>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span id="welcome-text" class="font-medium">Загрузка...</span>
+                    <button id="btn-logout" class="bg-blue-800 px-4 py-2 rounded hover:bg-blue-900 transition">Выйти</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="max-w-5xl mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-2 space-y-6">
+                <!-- Баланс -->
+                <div class="bg-white rounded-2xl shadow-lg p-8 border-l-8 border-blue-500">
+                    <p class="text-slate-500 text-sm font-semibold uppercase tracking-wider mb-1">Ваш баланс</p>
+                    <div class="flex items-end gap-2">
+                        <span id="balance-amount" class="text-5xl font-bold text-slate-800">...</span>
+                        <span class="text-2xl text-blue-600 font-bold mb-1">АР</span>
+                    </div>
+                </div>
+                <!-- Перевод -->
+                <div class="bg-white rounded-2xl shadow-lg p-8">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">Перевод средств</h3>
+                    <div class="flex gap-4 mb-4">
+                        <input id="transfer-receiver" type="text" placeholder="Ник получателя" class="w-1/2 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <input id="transfer-amount" type="number" placeholder="Сумма АР" class="w-1/2 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <p class="text-sm text-slate-500 mb-4">Комиссия банка: <span id="commission-rate" class="font-bold text-blue-600">5%</span></p>
+                    <button id="btn-transfer" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-md">Отправить АР</button>
+                    <p id="transfer-msg" class="mt-3 text-sm text-center font-medium"></p>
+                </div>
+            </div>
+            <!-- История -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 h-96 flex flex-col">
+                <h3 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">История</h3>
+                <div id="history-list" class="flex-1 overflow-y-auto space-y-3 pr-2 text-sm text-slate-500">
+                    <!-- Загрузка истории -->
+                </div>
+            </div>
+        </div>
+
+        <!-- АДМИН ПАНЕЛЬ -->
+        <div id="admin-panel" class="hidden max-w-5xl mx-auto px-6 pb-12">
+            <div class="bg-slate-800 rounded-2xl shadow-lg p-8 text-white">
+                <h3 class="text-xl font-bold text-blue-400 mb-6 border-b border-slate-700 pb-2 flex items-center gap-2">
+                    <span class="text-2xl">⚙️</span> Панель Банкира
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="font-semibold mb-3 text-slate-300">Выдать АР игроку</h4>
+                        <input id="admin-user" type="text" placeholder="Ник игрока" class="w-full mb-3 px-4 py-2 border border-slate-600 rounded-lg bg-slate-700 text-white">
+                        <input id="admin-amount" type="number" placeholder="Количество АР" class="w-full mb-3 px-4 py-2 border border-slate-600 rounded-lg bg-slate-700 text-white">
+                        <button id="btn-topup" class="w-full bg-emerald-600 font-bold py-2 rounded-lg hover:bg-emerald-700 transition">Пополнить</button>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-3 text-slate-300">Настройка комиссии (%)</h4>
+                        <div class="flex items-center gap-4 mb-3">
+                            <input id="admin-comm-slider" type="range" min="0" max="30" step="1" value="5" class="w-full cursor-pointer">
+                            <span id="comm-val" class="font-bold text-xl text-blue-400 w-12">5%</span>
+                        </div>
+                        <button id="btn-commission" class="w-full bg-blue-600 font-bold py-2 rounded-lg hover:bg-blue-700 transition mt-9">Сохранить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ПОДКЛЮЧЕНИЕ FIREBASE И ЛОГИКА -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, where, getDocs, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // Твои настройки Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB3unvYcGKFLk6RDTl1t39_P4NZMqJxkE8",
+            authDomain: "bank-system-a45ec.firebaseapp.com",
+            projectId: "bank-system-a45ec",
+            storageBucket: "bank-system-a45ec.firebasestorage.app",
+            messagingSenderId: "860974102580",
+            appId: "1:860974102580:web:7dedaa06461012937d3261"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUserDoc = null;
+        let globalCommission = 5;
+
+        // Вспомогательные функции
+        const getEmail = (user) => `${user.toLowerCase()}@arbank.ru`;
+        const showErr = (id, msg, success=false) => {
+            const el = document.getElementById(id);
+            el.innerText = msg;
+            el.className = `mt-3 text-sm text-center font-medium block ${success ? 'text-emerald-500' : 'text-red-500'}`;
+            setTimeout(() => el.style.display = 'none', 4000);
+            el.style.display = 'block';
+        };
+
+        // Загрузка настроек банка (комиссия)
+        async function loadBankSettings() {
+            const settingsSnap = await getDoc(doc(db, "settings", "bank"));
+            if (settingsSnap.exists()) {
+                globalCommission = settingsSnap.data().commission;
+            } else {
+                await setDoc(doc(db, "settings", "bank"), { commission: 5 });
+            }
+            document.getElementById('commission-rate').innerText = globalCommission + '%';
+            document.getElementById('admin-comm-slider').value = globalCommission;
+            document.getElementById('comm-val').innerText = globalCommission + '%';
+        }
+
+        // РЕГИСТРАЦИЯ
+        document.getElementById('btn-register').onclick = async () => {
+            const u = document.getElementById('auth-user').value;
+            const p = document.getElementById('auth-pass').value;
+            if (u.length < 3 || p.length < 6) return showErr('auth-error', 'Ник от 3 букв, пароль от 6.');
+            try {
+                const docSnap = await getDoc(doc(db, "users", u.toLowerCase()));
+                if (docSnap.exists()) return showErr('auth-error', 'Игрок с таким ником уже есть!');
+                
+                await createUserWithEmailAndPassword(auth, getEmail(u), p);
+                await setDoc(doc(db, "users", u.toLowerCase()), { username: u, balance: 0, role: 'player' });
+                showErr('auth-error', 'Успешно! Входим...', true);
+            } catch (e) { showErr('auth-error', 'Ошибка регистрации (возможно пароль слишком простой).'); console.log(e); }
+        };
+
+        // ВХОД
+        document.getElementById('btn-login').onclick = async () => {
+            const u = document.getElementById('auth-user').value;
+            const p = document.getElementById('auth-pass').value;
+            if (!u || !p) return showErr('auth-error', 'Введите ник и пароль');
+            try { await signInWithEmailAndPassword(auth, getEmail(u), p); } 
+            catch (e) { showErr('auth-error', 'Неверный ник или пароль.'); }
+        };
+
+        // ВЫХОД
+        document.getElementById('btn-logout').onclick = () => {
+            signOut(auth);
+            location.reload();
+        }
+
+        // ОТСЛЕЖИВАНИЕ АВТОРИЗАЦИИ
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('bank-screen').classList.remove('hidden');
+                const username = user.email.split('@')[0];
+                
+                // Получаем данные игрока
+                const docSnap = await getDoc(doc(db, "users", username));
+                if (docSnap.exists()) {
+                    currentUserDoc = docSnap.data();
+                    document.getElementById('welcome-text').innerText = `Привет, ${currentUserDoc.username}`;
+                    document.getElementById('balance-amount').innerText = currentUserDoc.balance.toFixed(2);
+                    
+                    if(currentUserDoc.role === 'banker') document.getElementById('admin-panel').classList.remove('hidden');
+                }
+                loadBankSettings();
+                loadHistory(username);
+            } else {
+                document.getElementById('auth-screen').classList.remove('hidden');
+                document.getElementById('bank-screen').classList.add('hidden');
+            }
+        });
+
+        // ПЕРЕВОД АР
+        document.getElementById('btn-transfer').onclick = async () => {
+            if (!currentUserDoc) return;
+            const receiverRaw = document.getElementById('transfer-receiver').value;
+            const amount = parseFloat(document.getElementById('transfer-amount').value);
+            const receiverId = receiverRaw.toLowerCase();
+            const senderId = currentUserDoc.username.toLowerCase();
+
+            if (amount <= 0 || !amount) return showErr('transfer-msg', 'Введите корректную сумму.');
+            if (receiverId === senderId) return showErr('transfer-msg', 'Себе переводить нельзя.');
+
+            const commissionAmount = amount * (globalCommission / 100);
+            const totalDeduction = amount + commissionAmount;
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const senderRef = doc(db, "users", senderId);
+                    const receiverRef = doc(db, "users", receiverId);
+                    const senderSnap = await transaction.get(senderRef);
+                    const receiverSnap = await transaction.get(receiverRef);
+
+                    if (!receiverSnap.exists()) throw "Получатель не найден на сайте!";
+                    if (senderSnap.data().balance < totalDeduction) throw "Недостаточно средств (комиссия " + globalCommission + "%)!";
+
+                    transaction.update(senderRef, { balance: senderSnap.data().balance - totalDeduction });
+                    transaction.update(receiverRef, { balance: receiverSnap.data().balance + amount });
+                    
+                    const txRef = doc(collection(db, "transactions"));
+                    transaction.set(txRef, { sender: senderSnap.data().username, receiver: receiverSnap.data().username, amount, date: Date.now() });
+                });
+                showErr('transfer-msg', 'Перевод успешно отправлен!', true);
+                document.getElementById('transfer-receiver').value = '';
+                document.getElementById('transfer-amount').value = '';
+                
+                // Обновляем визуал баланса
+                const newSnap = await getDoc(doc(db, "users", senderId));
+                document.getElementById('balance-amount').innerText = newSnap.data().balance.toFixed(2);
+                loadHistory(senderId);
+            } catch (e) { showErr('transfer-msg', e); }
+        };
+
+        // ИСТОРИЯ
+        async function loadHistory(userId) {
+            const list = document.getElementById('history-list');
+            list.innerHTML = 'Загрузка...';
+            
+            const q1 = query(collection(db, "transactions"), where("sender", "==", currentUserDoc.username));
+            const q2 = query(collection(db, "transactions"), where("receiver", "==", currentUserDoc.username));
+            
+            const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+            const txs = [...snap1.docs, ...snap2.docs].map(d => d.data()).sort((a,b) => b.date - a.date);
+
+            list.innerHTML = '';
+            if (txs.length === 0) list.innerHTML = 'Истории пока нет.';
+            
+            txs.forEach(tx => {
+                const isIncoming = tx.receiver === currentUserDoc.username;
+                const color = isIncoming ? 'text-emerald-500' : 'text-red-500';
+                list.innerHTML += `
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-100 flex justify-between items-center mb-2">
+                        <div>
+                            <p class="font-semibold text-slate-700 text-sm">${isIncoming ? 'От: '+tx.sender : 'Кому: '+tx.receiver}</p>
+                            <p class="text-xs text-slate-400">${new Date(tx.date).toLocaleString()}</p>
+                        </div>
+                        <span class="font-bold ${color}">${isIncoming ? '+' : '-'}${tx.amount} АР</span>
+                    </div>`;
+            });
+        }
+
+        // --- АДМИН ПАНЕЛЬ (БАНКИР) ---
+        document.getElementById('admin-comm-slider').oninput = (e) => document.getElementById('comm-val').innerText = e.target.value + '%';
+
+        document.getElementById('btn-commission').onclick = async () => {
+            if (currentUserDoc.role !== 'banker') return;
+            const newComm = parseInt(document.getElementById('admin-comm-slider').value);
+            await setDoc(doc(db, "settings", "bank"), { commission: newComm });
+            alert('Комиссия банка обновлена!');
+            loadBankSettings();
+        };
+
+        document.getElementById('btn-topup').onclick = async () => {
+            if (currentUserDoc.role !== 'banker') return;
+            const userRaw = document.getElementById('admin-user').value.toLowerCase();
+            const amount = parseFloat(document.getElementById('admin-amount').value);
+            
+            if(!userRaw || !amount) return alert('Введите ник и сумму');
+            try {
+                const userRef = doc(db, "users", userRaw);
+                const userSnap = await getDoc(userRef);
+                if (!userSnap.exists()) return alert('Игрок не найден (он должен хотя бы раз войти на сайт)');
+                
+                await updateDoc(userRef, { balance: userSnap.data().balance + amount });
+                await addDoc(collection(db, "transactions"), { sender: "BANK", receiver: userSnap.data().username, amount, date: Date.now() });
+                
+                alert('Успешно пополнено!');
+                document.getElementById('admin-user').value = '';
+                document.getElementById('admin-amount').value = '';
+            } catch (e) { alert('Ошибка: ' + e.message); }
+        };
+    </script>
+</body>
+</html>
