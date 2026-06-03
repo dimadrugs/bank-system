@@ -10,9 +10,48 @@
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Плавное появление всплывающего окна */
         .modal-enter { animation: modalFade 0.3s ease-out forwards; }
         @keyframes modalFade { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        /* НАСТОЯЩИЙ 3D MINECRAFT БЛОК */
+        .mc-scene { 
+            perspective: 800px; 
+            margin: 0 auto; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+        }
+        .mc-block { 
+            width: var(--size); 
+            height: var(--size); 
+            position: relative; 
+            transform-style: preserve-3d; 
+            animation: spinBlock var(--speed, 6s) infinite linear; 
+        }
+        .mc-face { 
+            position: absolute; 
+            width: 100%; 
+            height: 100%; 
+            /* Ссылка на текстуру руды */
+            background-image: url('https://minecraft.wiki/images/Diamond_Ore_%28texture%29_JE5_BE5.png'); 
+            background-size: cover; 
+            image-rendering: pixelated; /* Делает пиксели четкими! */
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.6); /* Тени по краям блока */
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        /* Расставляем грани по сторонам куба в зависимости от размера */
+        .mc-front  { transform: translateZ(calc(var(--size) / 2)); } 
+        .mc-back   { transform: rotateY(180deg) translateZ(calc(var(--size) / 2)); }
+        .mc-right  { transform: rotateY(90deg) translateZ(calc(var(--size) / 2)); } 
+        .mc-left   { transform: rotateY(-90deg) translateZ(calc(var(--size) / 2)); }
+        .mc-top    { transform: rotateX(90deg) translateZ(calc(var(--size) / 2)); } 
+        .mc-bottom { transform: rotateX(-90deg) translateZ(calc(var(--size) / 2)); }
+        
+        /* Анимация вращения (с наклоном как дроп в майнкрафте) */
+        @keyframes spinBlock { 
+            0% { transform: rotateX(-20deg) rotateY(0deg); } 
+            100% { transform: rotateX(-20deg) rotateY(360deg); } 
+        }
     </style>
 </head>
 <body class="text-slate-800">
@@ -21,9 +60,14 @@
     <div id="auth-screen" class="min-h-screen flex items-center justify-center fade-in">
         <div class="bg-white p-8 rounded-2xl shadow-xl w-96 text-center border-t-4 border-blue-600">
             
-            <!-- СЮДА ВСТАВЬ ССЫЛКУ НА СВОЮ РУДУ -->
-            <!-- Сейчас тут стоит картинка-заглушка алмаза. Замени ссылку src="..." на свою картинку/гифку -->
-            <img src="https://minecraft.wiki/images/Diamond_Ore_%28texture%29_JE5_BE5.png" alt="AR Ore" class="w-24 h-24 mx-auto mb-4 drop-shadow-md">
+            <!-- 3D Блок руды -->
+            <div class="mc-scene mb-8" style="--size: 80px; --speed: 8s;">
+                <div class="mc-block">
+                    <div class="mc-face mc-front"></div><div class="mc-face mc-back"></div>
+                    <div class="mc-face mc-right"></div><div class="mc-face mc-left"></div>
+                    <div class="mc-face mc-top"></div><div class="mc-face mc-bottom"></div>
+                </div>
+            </div>
             
             <h1 class="text-3xl font-bold text-blue-900 mb-2">AR Bank</h1>
             <p class="text-slate-500 mb-8">Войдите для управления счетом</p>
@@ -59,14 +103,21 @@
         <!-- Шапка -->
         <header class="bg-blue-700 text-white shadow-md">
             <div class="max-w-5xl mx-auto px-6 py-3 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <img src="https://minecraft.wiki/images/Diamond_Ore_%28texture%29_JE5_BE5.png" alt="Logo" class="w-10 h-10 drop-shadow">
+                <div class="flex items-center gap-4">
+                    <!-- Маленький 3D Блок в шапке -->
+                    <div class="mc-scene" style="--size: 32px; --speed: 12s;">
+                        <div class="mc-block">
+                            <div class="mc-face mc-front"></div><div class="mc-face mc-back"></div>
+                            <div class="mc-face mc-right"></div><div class="mc-face mc-left"></div>
+                            <div class="mc-face mc-top"></div><div class="mc-face mc-bottom"></div>
+                        </div>
+                    </div>
                     <h2 class="text-xl font-bold tracking-wide">AR Bank</h2>
                 </div>
                 <div class="flex items-center gap-4">
                     <!-- Аватарка игрока (подгружается автоматически) -->
                     <div class="flex items-center gap-3 bg-blue-800 px-4 py-2 rounded-lg border border-blue-600 shadow-inner">
-                        <img id="player-avatar" src="" alt="Head" class="w-8 h-8 rounded-md bg-blue-900">
+                        <img id="player-avatar" src="" alt="Head" class="w-8 h-8 rounded-md bg-blue-900 shadow">
                         <span id="welcome-text" class="font-medium tracking-wide">Загрузка...</span>
                     </div>
                     <button id="btn-logout" class="bg-slate-100 text-slate-700 font-bold px-4 py-2 rounded-lg hover:bg-white transition shadow">Выход</button>
@@ -78,15 +129,24 @@
             <div class="md:col-span-2 space-y-6">
                 <!-- Баланс -->
                 <div class="bg-white rounded-2xl shadow-lg p-8 border-l-8 border-blue-500 relative overflow-hidden">
-                    <div class="absolute -right-10 -top-10 opacity-5">
-                        <img src="https://minecraft.wiki/images/Diamond_Ore_%28texture%29_JE5_BE5.png" class="w-64 h-64">
+                    <!-- Огромный блок на заднем фоне -->
+                    <div class="absolute -right-16 -top-16 opacity-10 pointer-events-none">
+                        <div class="mc-scene" style="--size: 250px; --speed: 30s;">
+                            <div class="mc-block">
+                                <div class="mc-face mc-front"></div><div class="mc-face mc-back"></div>
+                                <div class="mc-face mc-right"></div><div class="mc-face mc-left"></div>
+                                <div class="mc-face mc-top"></div><div class="mc-face mc-bottom"></div>
+                            </div>
+                        </div>
                     </div>
+
                     <p class="text-slate-500 text-sm font-semibold uppercase tracking-wider mb-1 relative z-10">Доступный баланс</p>
                     <div class="flex items-end gap-2 relative z-10">
                         <span id="balance-amount" class="text-6xl font-extrabold text-slate-800 tracking-tight">0</span>
                         <span class="text-3xl text-blue-600 font-bold mb-1">АР</span>
                     </div>
                 </div>
+                
                 <!-- Перевод -->
                 <div class="bg-white rounded-2xl shadow-lg p-8">
                     <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
@@ -109,6 +169,7 @@
                     <p id="transfer-msg" class="mt-4 text-sm text-center font-medium"></p>
                 </div>
             </div>
+            
             <!-- История -->
             <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col" style="height: 520px;">
                 <h3 class="text-xl font-bold text-slate-800 mb-4 pb-2 border-b">История операций</h3>
@@ -233,7 +294,6 @@
                     document.getElementById('welcome-text').innerText = currentUserDoc.username;
                     document.getElementById('balance-amount').innerText = currentUserDoc.balance.toFixed(2);
                     
-                    // Загрузка лица игрока по нику с API Minotar
                     document.getElementById('player-avatar').src = `https://minotar.net/helm/${currentUserDoc.username}/100.png`;
                     
                     if(currentUserDoc.role === 'banker') document.getElementById('admin-panel').classList.remove('hidden');
@@ -312,14 +372,14 @@
                 const isIncoming = tx.receiver === currentUserDoc.username;
                 const color = isIncoming ? 'text-emerald-600 bg-emerald-50' : 'text-slate-700 bg-slate-50';
                 const sign = isIncoming ? '+' : '-';
-                // Берем голову того, с кем была транзакция
                 const otherUser = isIncoming ? tx.sender : tx.receiver;
+                // Иконка руды для Банка, или голова для игрока
                 const headImg = otherUser === "BANK" ? "https://minecraft.wiki/images/Diamond_Ore_%28texture%29_JE5_BE5.png" : `https://minotar.net/helm/${otherUser}/50.png`;
 
                 list.innerHTML += `
                     <div class="p-4 rounded-xl border border-slate-100 flex justify-between items-center mb-3 ${color} shadow-sm">
                         <div class="flex items-center gap-3">
-                            <img src="${headImg}" class="w-10 h-10 rounded">
+                            <img src="${headImg}" class="w-10 h-10 rounded shadow-sm" style="image-rendering: pixelated;">
                             <div>
                                 <p class="font-bold text-sm">${isIncoming ? 'От: '+tx.sender : 'Кому: '+tx.receiver}</p>
                                 <p class="text-xs opacity-70 mt-0.5">${new Date(tx.date).toLocaleString([], {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})}</p>
